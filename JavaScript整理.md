@@ -96,7 +96,7 @@ function throttle(func, delay) {
 }
 ```
 
-![throttle](C:\Users\Administrator\Desktop\throttle.png)
+![throttle](assets/throttle.png)
 
 #### 懒加载
 
