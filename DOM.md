@@ -1,15 +1,10 @@
----
-typora-root-url: assets
-typora-copy-images-to: assets
----
-
 ### DOM 
 
 浏览器无法直接理解和使用 HTML，所以需要将 HTML 转换为 DOM（Document Object Model）
 
 > DOM 是保存在内存中树状结构的 HTML
 
-![DOM](/DOM.png)
+![DOM](assets/DOM.png)
 
 DOM 将 HTML 文档视为树状结构，所有内容都是节点（对象）
 
@@ -19,7 +14,7 @@ DOM 将 HTML 文档视为树状结构，所有内容都是节点（对象）
 - 文本节点
 - 注释节点
 
-![DOM Tree](/DOM Tree.gif)
+![DOM Tree](assets/DOM Tree.gif)
 
 DOM 树中所有节点均可通过 JavaScript 进行访问和操作
 
