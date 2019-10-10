@@ -8,13 +8,13 @@
 
 DOM 将 HTML 文档视为树状结构，所有内容都是节点（对象）
 
-- 文档节点：文档的根节点，只有一个子节点（文档元素 <html>）
-- 元素节点：HTML 元素（栗子：<p>我是 HTML 元素<p>）
+- 文档节点：文档的根节点，只有一个子节点（文档元素 &lt;html&gt;）
+- 元素节点：HTML 元素（栗子：&lt;p&gt;我是 HTML 元素&lt;p&gt;）
 - 属性节点：HTML 属性
 - 文本节点
 - 注释节点
 
-![DOM Tree](assets/DOM Tree.png)
+![DOM Tree](assets/DOM-Tree.png)
 
 DOM 树中所有节点均可通过 JavaScript 进行访问和操作
 
