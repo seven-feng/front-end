@@ -14,7 +14,7 @@ DOM 将 HTML 文档视为树状结构，所有内容都是节点（对象）
 - 文本节点
 - 注释节点
 
-![DOM Tree](assets/DOM Tree.gif)
+![DOM Tree](assets/DOM Tree.png)
 
 DOM 树中所有节点均可通过 JavaScript 进行访问和操作
 
