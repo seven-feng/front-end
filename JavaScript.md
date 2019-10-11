@@ -1,4 +1,125 @@
-# JavaScript整理
+### typeof 和 instanceof
+
+基本类型：Undefined、Null、Boolean、Number、String
+
+引用类型：
+
+1. 原生引用类型：Object、Array、Date、RegExp、Function等
+2. 自定义引用类型
+
+
+
+确定一个值是哪种基本类型可用 typeof 操作符
+
+| 操作符 | 值                      | 类型      |
+| ------ | ----------------------- | --------- |
+| typeof | "abc"                   | string    |
+|        | true                    | boolean   |
+|        | 123                     | number    |
+|        |                         | undefined |
+|        | null （对应 Null 类型） | object    |
+|        | new Object()            | object    |
+|        | function() {}           | function  |
+
+> 从逻辑角度来看，null 值表示一个**空对象指针**，所以使用 typeof 操作符检测 null 值时会返回 "object"
+>
+> undefined 派生自 null，所以 undefined == null 的值是 true
+
+&emsp;
+
+确定一个值是哪种引用类型可用 instanceof 操作符
+
+| 值   | 操作符     | 构造函数 | 结果 |
+| ---- | ---------- | -------- | ---- |
+| obj  | instanceof | Object   | true |
+
+可以使用 instanceof 操作符来测试实例与原型链中出现过的构造函数
+
+> 每个引用类型都有一个对应的构造函数，可通过 new 操作符来创建实例
+
+&emsp;
+
+### window 和 document
+
+window 对象表示浏览器的一个实例，它既是通过 JavaScript 访问浏览器窗口的一个接口，又是 ECMAScript 规定的 Global 对象（因此所有在全局作用域中声明的变量、函数都会变成 window 对象的属性和方法）
+
+document 对象是 window 对象的一个属性，表示整个 HTML 页面
+
+&emsp;
+
+### 闭包
+
+指有权访问另一个函数作用域中的变量的函数
+
+&emsp;
+
+### for-in 和 for-of
+
+for-in 主要用于遍历对象
+
+~~~javascript
+var obj = {a: 1,b: 2};
+for(var o in obj) {
+  console.log(o);
+}
+// a
+// b
+
+// 遍历数组时，返回的是数组下标
+var array  = [2,3,4,5];
+for(var i in array) {
+  console.log(i);
+}
+// 0 1 2 3
+~~~
+
+&emsp;
+
+for-of 不仅支持数组，还支持大多数类数组对象，还包括字符串
+
+~~~javascript
+var array  = [2,3,4,5];
+for(var i of array) {
+  console.log(i);
+}
+// 2 3 4 5
+
+var array  = "abc";
+for(var i of array) {
+  console.log(i);
+}
+// a b c
+~~~
+
+&emsp;
+
+### 对象属性遍历
+
+Object.keys() 返回一个由**对象本身**的可枚举属性组成的数组
+
+for…in 遍历**对象本身**的可枚举属性，以及对象从其**原型**中继承的属性
+
+obj.hasOwnProperty(propertyName) 用于检查给定的属性是否在当前对象实例中（而不是在实例的原型中）
+
+> 在“深拷贝”中，可以用 Object.keys() 代替 for…in + obj.hasOwnProperty(propertyName)
+
+&emsp;
+
+### Object 构造函数的方法
+
+Object.create() 方法创建一个新对象，使用现有的对象来提供新创建的对象的\_\_proto\_\_
+
+Object.defineProperty() 方法会直接在一个对象上定义一个新属性，或者修改一个对象的现有属性， 并返回这个对象。
+
+&emsp;
+
+### Object 构造函数原型的方法
+
+Object.prototype.isPrototypeOf() 方法用于测试一个对象是否存在于另一个对象的原型链上
+
+Object.prototype.hasOwnProperty(prop) 方法会返回一个布尔值，指示对象自身属性中是否具有指定的属性
+
+&emsp;
 
 ### 组合使用构造函数模式与原型模式
 
@@ -29,6 +150,8 @@ sub.sayAge();
 sub.sayName();
 ```
 
+&emsp;
+
 ### 深拷贝
 
 ``` javascript
@@ -49,6 +172,8 @@ function deepClone(obj) {
   return clone;
 }
 ```
+
+&emsp;
 
 ### 防抖、节流、懒加载
 
@@ -84,7 +209,7 @@ function throttle(func, delay) {
     var remain = delay - (cur - pre);
     clearTimeout(timer);
     if (remain <= 0) {
-      func.apply(this);
+      func.apply(context);
       pre = Date.now();
     } else {
       timer = setTimeout(function() {
@@ -123,6 +248,8 @@ function lazyLoad() {
 window.onload = lazyLoad;
 window.onscroll = throttle(lazyLoad, 1000);
 ```
+
+&emsp;
 
 ### bind函数
 
@@ -165,6 +292,8 @@ var func = function( a, b, c, d ) {
 func(3,4);
 ```
 
+&emsp;
+
 ### 跨浏览器事件处理程序
 
 ``` javascript
@@ -184,5 +313,36 @@ addEvent(btn, "click", function() {
 });
 ```
 
+&emsp;
 
+### 事件处理程序
+
+~~~javascript
+// HTML事件处理程序
+<input type="button" value="Click Me" onclick="alert('Clicked')" />
+
+// DOM0级事件处理程序
+var btn = document.getElementById("myBtn");
+btn.onclick = function() {
+	alert("Clicked");
+};
+
+// DOM2级事件处理程序
+var btn = document.getElementById("myBtn");
+btn.addEventListener("click", function() {
+	alert(this.id);
+}, false);
+// 可添加多个，添加顺序触发
+// true表示捕获阶段，false表示冒泡阶段
+
+// IE事件处理程序
+var btn = document.getElementById("myBtn");
+btn.attachEvent("onclick", function() {
+alert("Clicked");
+});
+// 可添加多个，添加相反顺序触发
+
+~~~
+
+&emsp;
 
