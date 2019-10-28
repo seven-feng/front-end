@@ -1,6 +1,6 @@
 ### typeof 和 instanceof
 
-基本类型：Undefined、Null、Boolean、Number、String
+基本类型：Undefined、Null、Boolean、Number、String、BigInt
 
 引用类型：
 
@@ -16,6 +16,7 @@
 | typeof | "abc"                   | string    |
 |        | true                    | boolean   |
 |        | 123                     | number    |
+|        | 123n                    | bigint    |
 |        |                         | undefined |
 |        | null （对应 Null 类型） | object    |
 |        | new Object()            | object    |
@@ -373,3 +374,60 @@ js 是单线程的，浏览器只分配给 js 一个主线程，用来执行任�
 浏览器（js的宿主环境）是多线程的，可以为异步任务开辟单独的线程，异步任务完成之后，将回调函数放入任务队列，所以说浏览器是事件驱动的，通过执行一个个事件来运行。
 
 整个执行过程：js 主线程执行一个任务，推入执行栈，执行函数时，如有其他函数，就继续入栈，执行完就出栈。等到执行栈为空时，就从任务栈中读取新任务入栈，读取任务的过程就叫作 event loop。
+
+&emsp;
+
+### Event
+
+e.target：触发事件的元素
+
+e.currentTarget：绑定事件的元素
+
+e.offsetX：当鼠标事件发生时，鼠标相对于事件源 x 轴的位置
+
+e.offsetY：当鼠标事件发生时，鼠标相对于事件源 y 轴的位置
+
+e.clientX：当鼠标事件发生时，鼠标相对于浏览器（这里说的是浏览器的有效区域）x轴的位置
+
+e.clientY：当鼠标事件发生时，鼠标相对于浏览器（这里说的是浏览器的有效区域）y轴的位置
+
+e.pageX：e.clientX + 横向滚动条距离
+
+e.pageY：e.clientY + 纵向滚动条距离
+
+e.screenX：当鼠标事件发生时，鼠标相对于显示器屏幕 x 轴的位置
+
+e.screenY：当鼠标事件发生时，鼠标相对于显示器屏幕 y 轴的位置
+
+&emsp;
+
+### Dom 元素
+
+HTMLElement.offsetParent，指向最近的包含该元素的定位元素
+
+HTMLElement.offsetLeft，返回当前元素相对于其 offsetParent 元素的左侧的距离
+
+HTMLElement.offsetTop，返回当前元素相对于其 offsetParent 元素的顶部的距离
+
+HTMLElement.offsetWidth，返回元素的布局宽度
+
+HTMLElement.offsetHeight，返回元素的布局高度
+
+![HTMLElement-offsetwidth-offsetheight](assets/HTMLElement-offsetwidth-offsetheight.png)
+
+Element.scrollLeft，表示元素横向滚动的距离
+
+Element.scrollTop，表示元素纵向滚动的距离
+
+Element.scrollWidth，表示元素滚动视图的宽度（包括由于溢出导致的视图中不可见内容 ）
+
+Element.scrollHeight，表示元素滚动视图的高度（包括由于溢出导致的视图中不可见内容 ）
+
+Element.clientWidth，表示元素内部的宽度
+
+Element.clientHeight，表示元素内部的高度
+
+![element-clientwidth-clientheight](assets/element-clientwidth-clientheight.png)
+
+
+
