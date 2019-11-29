@@ -79,6 +79,9 @@ element.appendChild(node)             // 为元素添加一个新的子元素
 element.removeChild(element)          // 删除一个子元素
 element.getAttribute(attributename)   // 返回指定元素的属性值
 element.setAttribute(attributename,attributevalue)  // 设置或者改变指定属性并指定值
+
+element.classList.add(class1, class2, ...)			// 添加一个或多个类名
+element.classList.remove(class1, class2, ...)		// 移除元素中一个或多个类名
 ~~~
 
 &emsp;
