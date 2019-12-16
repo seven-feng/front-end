@@ -161,15 +161,13 @@ function deepClone(obj) {
     return null;
   }
   var clone = Array.isArray(obj)? [] : {};
-  for(var key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      if (typeof obj[key] == 'object') {
-        clone[key] = deepClone(obj[key]);
-      } else {
-        clone[key] = obj[key];
-      }
+  Object.keys(obj).forEach(key => {
+    if (typeof obj[key] == 'object') {
+      clone[key] = deepClone(obj[key]);
+    } else {
+      clone[key] = obj[key];
     }
-  }
+  })
   return clone;
 }
 ```

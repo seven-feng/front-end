@@ -1,5 +1,113 @@
 ## 算法
 
+### 数组
+
+数组（Array）是一种线性表数据结构。它用一组连续的内存空间，来存储一组具有相同类型的数据。最大的特点就是支持**随机访问**，但插入、删除操作也因此变得比较低效，平均情况时间复杂度为 O(n)。
+
+&emsp;
+
+### 链表
+
+~~~js
+/**
+ * 单链表中判断回文串字符串
+ */
+
+// 节点
+class Node {
+  constructor(element) {
+    this.element = element
+    this.next = null
+  }
+}
+// 链表
+class LinkedList {
+  constructor() {
+    this.head = new Node('head')
+  }
+  // 根据value查找节点
+  findByValue(element) {
+    let currentNode = this.head.next
+    while(currentNode !== null && currentNode.element !== element) {
+      currentNode = currentNode.next
+    }
+    return currentNode === null? -1: currentNode
+  }
+
+   // 向链表末尾追加节点
+   appned(newElement) {
+    const newNode = new Node(newElement)
+    let currentNode = this.head
+    while(currentNode.next) {
+      currentNode = currentNode.next
+    }
+    currentNode.next = newNode
+   }
+
+    // 遍历显示所有节点
+    display() {
+      let currentNode = this.head.next
+      while(currentNode) {
+        console.log(currentNode.element)
+        currentNode = currentNode.next
+      }
+    }
+
+    // 判断是否是回文串
+    palindromic() {
+      let slow = this.head.next
+      let fast = this.head.next
+      let mid = null
+      // 找出中间节点
+      while(fast.next && fast.next.next) {
+        // 快指针前进两个节点
+        fast = fast.next.next
+        // 慢指针前进一个节点
+        slow = slow.next
+      }
+      mid = slow
+      // 后半部分逆序
+      let currentNode = null
+      let nextNode = null
+      if(fast.next === null) { // 奇数回文
+        currentNode = slow
+        nextNode = slow.next
+      } else { // 偶数回文
+        currentNode = slow.next
+        nextNode = slow.next.next
+      }
+      while(nextNode) {
+        let next = nextNode.next
+        nextNode.next = currentNode
+        currentNode = nextNode
+        nextNode = next
+      }
+      // 前后比较
+      let s = this.head.next
+      let e = currentNode
+      while(s !== mid && s.element === e.element) {
+        s = s.next
+        e = e.next
+      }
+      if(s.next === mid) {
+        return true
+      } else {
+        return false
+      }
+    }
+}
+
+
+const list = new LinkedList()
+list.appned('a')
+list.appned('b')
+list.appned('a')
+
+var result = list.palindromic()
+~~~
+
+
+
 ### 树
 
 ~~~js
