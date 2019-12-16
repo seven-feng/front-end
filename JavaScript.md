@@ -566,3 +566,24 @@ function drop_handler(ev) {
 #####  拖动结束
 
 拖动操作结束时，在源元素（开始拖动时的目标元素）上触发 dragend 事件。不管拖动是完成还是被取消这个事件都会被触发。 dragend 事件处理程序可以检查 dropEffect 属性的值来确认拖动成功与否。
+
+&emsp;
+
+### Object.defineProperty()
+
+`Object.defineProperty()` 方法会直接在一个对象上定义一个新属性，或者修改一个对象的现有属性， 并返回这个对象。
+
+> Object.defineProperty(obj, prop, descriptor) // obj：对象，prop：属性，descriptor：属性描述符
+
+属性描述符有两种主要形式：**数据描述符**和**存取描述符**。
+
+**数据描述符**定义了一个具有值的属性，该值可能是可写的，也可能是不可写的。我们将该属性叫作**数据属性**。
+
+**存取描述符**定义了一个由 getter-setter 函数对描述的属性，我们将该属性叫作**访问器属性**。
+
+描述符必须是这两种形式之一，不能同时是两者。
+
+|            | configurable | enumerable | value | writable | get  | set  |
+| ---------- | ------------ | ---------- | ----- | -------- | ---- | ---- |
+| 数据描述符 | Yes          | Yes        | Yes   | Yes      | No   | No   |
+| 存取描述符 | Yes          | Yes        | No    | No       | Yes  | Yes  |

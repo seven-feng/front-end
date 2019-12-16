@@ -50,10 +50,11 @@ ID选择器：0,1,0,0
 
 块级元素会独占一行，默认情况下，其宽度自动填满其父元素宽度
 
-1. 行内元素不会独占一行，相邻的行内元素会排列在同一行里，直到一行排不下，才会换行，其宽度随元素的内容而变化
-2. 块级元素width、height、margin的四个方向、 padding的四个方向都正常显示，遵循标准的css盒模型，例如：div
+行内元素不会独占一行，相邻的行内元素会排列在同一行里，直到一行排不下，才会换行，其宽度随元素的内容而变化
 
 &emsp;
+
+块级元素width、height、margin的四个方向、 padding的四个方向都正常显示，遵循标准的css盒模型，例如：div
 
 **行内替换元素** width、height、margin 的四个方向、 padding 的四个方向都正常显示，遵循标准的 css 盒模型，例如：img
 
@@ -102,13 +103,46 @@ Flex（Flexible Box）意为弹性布局
 
 采用 Flex 布局的元素，称为 Flex 容器（flex container），简称”容器”。它的所有子元素自动成为容器成员，称为Flex 项目（flex item），简称”项目”
 
- &emsp;
+&emsp;
 
 容器属性：flex-direction、flex-wrap、flex-flow、justify-content、align-items、align-content
 
 项目属性：order、flex-grow、flex-shrink、flex-basis、flex、align-self
 
  &emsp;
+
+flex 属性是 flex-grow, flex-shrink 和 flex-basis 的简写
+
+`flex: initial`
+
+元素会根据自身宽高设置尺寸。它会缩短自身以适应 flex 容器，但不会伸长并吸收 flex 容器中的额外自由空间来适应 flex 容器 。相当于将属性设置为 `flex: 0 1 auto`。
+
+`flex: auto`
+
+元素会根据自身的宽度与高度来确定尺寸，但是会伸长并吸收 flex 容器中额外的自由空间，也会缩短自身来适应 flex 容器。这相当于将属性设置为 `flex: 1 1 auto`。
+
+`flex: none`
+
+元素会根据自身宽高来设置尺寸。它是完全非弹性的：既不会缩短，也不会伸长来适应 flex 容器。相当于将属性设置为 `flex: 0 0 auto`。
+
+```css
+/* One value, unitless number: flex-grow */
+flex: 2;
+
+/* One value, width/height: flex-basis */
+flex: 30px;
+
+/* Two values: flex-grow | flex-basis */
+flex: 1 30px;
+
+/* Two values: flex-grow | flex-shrink */
+flex: 2 2;
+
+/* Three values: flex-grow | flex-shrink | flex-basis */
+flex: 2 2 10%;
+```
+
+&emsp;
 
 ### CSS 预处理器
 
