@@ -20,10 +20,10 @@ class Node {
     this.next = null
   }
 }
-// 链表
+// 链表(带头链表)
 class LinkedList {
   constructor() {
-    this.head = new Node('head')
+    this.head = new Node()
   }
   // 根据value查找节点
   findByValue(element) {
