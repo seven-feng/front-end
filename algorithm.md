@@ -43,6 +43,20 @@ class LinkedList {
     }
     currentNode.next = newNode
    }
+    
+    // 根据值删除
+    remove(element) {
+      let prevNode = this.head
+      let currentNode = this.head.next
+      while(currentNode) {
+        if(currentNode.element === element) {
+          prevNode.next = currentNode.next
+          return
+        }
+        prevNode = currentNode
+        currentNode = currentNode.next
+      }
+    }
 
     // 遍历显示所有节点
     display() {
@@ -95,6 +109,120 @@ class LinkedList {
         return false
       }
     }
+    
+    // 反转单链表 自己想的方法
+    reverseList() {
+      // 当前链表为空或者只有一个节点，就不作处理
+      if(!this.head.next || !this.head.next.next) return 
+      let cur = this.head.next
+      let next = cur.next
+      cur.next = null
+      while(next.next) {
+        let tmp = next.next
+        next.next = cur
+        cur = next
+        next = tmp
+      }
+      next.next = cur
+      this.head.next = next
+    }
+
+    // 尾插法
+    reverseList1() {
+      const root = new Node('head')
+      let currentNode = this.head.next
+      while (currentNode !== null) {
+        const next = currentNode.next
+        currentNode.next = root.next
+        root.next = currentNode
+        currentNode = next
+      }
+      this.head = root
+    }
+
+    // 增强尾插法可读性，便于初学者理解
+    reverseList2() {
+      let currentNode = this.head.next
+      let previousNode = null
+      while(currentNode !== null){
+        let nextNode = currentNode.next
+        currentNode.next = previousNode
+        previousNode = currentNode
+        currentNode = nextNode
+      }
+      this.head.next = previousNode
+    }
+    
+    // 单链表中环的检测
+    // 快慢指针法，慢指针每次前进一个节点，快指针每次前进两个节点
+    // 若有环，快慢指针先后进环，且必定会在环中相遇
+    checkCircle() {
+      if(!this.head.next || !this.head.next.next) return false
+      let slow = this.head
+      let fast = this.head.next
+      while(fast && fast.next) {
+        slow = slow.next
+        fast = fast.next.next
+        if(slow === fast) return true
+      }
+      return false
+    }
+    
+    // 删除链表倒数第 n 个结点
+    removeByIndexFromEnd(index) {
+      if(this.checkCircle()) return
+      this.reverseList2()
+      let pos = 1
+      let currentNode = this.head.next
+      while(currentNode && pos < index) {
+        currentNode = currentNode.next
+        pos++
+      }
+      if (currentNode === null) {
+        console.log('无法删除最后一个节点或者该节点不存在')
+        return false
+      }
+      this.remove(currentNode.element)
+      this.reverseList2()
+    }
+    
+    // 求中间节点
+    findMiddleNode() {
+      if(!this.head.next) return
+      let slow = this.head.next
+      let fast = this.head.next
+      while(fast.next && fast.next.next) {
+        slow = slow.next
+        fast = fast.next.next
+      }
+      console.log(slow.element)
+      return slow
+    }
+}
+
+// 两个有序的链表合并
+const mergeSortedLists = (listA, listB) => {
+  if(!listA || !listB) return null
+  let a = listA.head.next
+  let b = listB.head.next
+  let listC = new LinkedList()
+  let c = listC.head
+  while(a && b) {
+    if(a.element > b.element) {
+      c.next = b
+      b = b.next
+    } else {
+      c.next = a
+      a = a.next
+    }
+    c = c.next
+  }
+  if(a) {
+    c.next = a
+  } else {
+    c.next = b
+  }
+  return listC
 }
 
 
@@ -106,7 +234,7 @@ list.appned('a')
 var result = list.palindromic()
 ~~~
 
-
+&emsp;
 
 ### 树
 

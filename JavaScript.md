@@ -585,3 +585,7 @@ function drop_handler(ev) {
 | ---------- | ------------ | ---------- | ----- | -------- | ---- | ---- |
 | 数据描述符 | Yes          | Yes        | Yes   | Yes      | No   | No   |
 | 存取描述符 | Yes          | Yes        | No    | No       | Yes  | Yes  |
+
+&emsp;
+
+!! 的作用就是把值转化为布尔值，!!a 等效于 Boolean(a)
