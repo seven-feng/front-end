@@ -236,6 +236,99 @@ var result = list.palindromic()
 
 &emsp;
 
+### 栈
+
+~~~js
+class Node {
+  constructor(element) {
+    this.element = element
+    this.next = null
+  }
+}
+
+// 链式栈
+class StackBasedLinkedList {
+  constructor() {
+    this.top = null
+  }
+
+  // 入栈
+  push(element) {
+    const node = new Node(element)
+    node.next = this.top
+    this.top = node
+  }
+
+  // 出栈
+  pop() {
+    if(!this.top) {
+      return
+    }
+    const node = this.top
+    this.top = node.next
+    return node.element
+  }
+
+  display() {
+    let node = this.top
+    while(node) {
+      console.log(node.element)
+      node = node.next
+    }
+  }
+}
+
+/**
+ * 使用前后栈实现浏览器的前进后退
+ */
+class Browser {
+  constructor() {
+    this.forwardStack = new StackBasedLinkedList()
+    this.backwardStack = new StackBasedLinkedList()
+  }
+  
+  // 浏览
+  browse(element) {
+    this.backwardStack.push(element)
+    this.display()
+  }
+
+  // 前进
+  forward() {
+    const element = this.forwardStack.pop()
+    if(element) {
+      this.backwardStack.push(element)
+    }
+    this.display()
+  }
+
+  // 后退
+  backward() {
+    const element = this.backwardStack.pop()
+    if(element) {
+      this.forwardStack.push(element)
+    }
+    this.display()
+  }
+
+  display() {
+    const node = this.backwardStack.top
+    if(node) {
+      console.log(node.element)
+    }
+  }
+}
+
+let browser = new Browser()
+browser.browse('a')
+browser.browse('b')
+browser.browse('c')
+browser.backward()
+browser.forward()
+~~~
+
+&emsp;
+
 ### 树
 
 ~~~js
