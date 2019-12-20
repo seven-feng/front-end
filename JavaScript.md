@@ -54,6 +54,10 @@ document 对象是 window 对象的一个属性，表示整个 HTML 页面
 
 &emsp;
 
+!! 的作用就是把值转化为布尔值，!!a 等效于 Boolean(a)
+
+&emsp;
+
 ### for-in 和 for-of
 
 for-in 主要用于遍历对象
@@ -588,4 +592,199 @@ function drop_handler(ev) {
 
 &emsp;
 
-!! 的作用就是把值转化为布尔值，!!a 等效于 Boolean(a)
+### JavaScript 模块化规范
+
+模块化解决的问题：
+
+- 命名冲突
+- 文件依赖
+
+##### CommonJS
+
+`CommonJS`  规范的核心思想是允许模块通过  `require`  方法来**同步**加载所要依赖的其他模块，然后通过  `exports`  或  `module.exports`  来导出需要暴露的接口
+
+- 所有代码都运行在模块作用域，不会污染全局作用域
+- 模块可以多次加载，但是只会在第一次加载时运行一次，然后运行结果就被缓存了，以后再加载，就直接读取缓存结果。要想让模块再次运行，必须清除缓存
+- 模块加载的顺序，按照其在代码中出现的顺序
+
+~~~js
+// module.exports 属性表示当前模块对外输出的接口
+// 其他文件加载该模块，实际上就是读取 module.exports 的值
+module.exports = someValue;
+// 为了方便，Node 为每个模块提供一个 exports 变量，指向 module.exports
+exports.message = 'hello world';
+// require 的基本功能是，加载并执行一个 JavaScript 文件，然后返回该模块的 exports 属性的值
+require("module");
+~~~
+
+加载和执行机制：
+
+- 同步加载执行
+- 输入的是被输出的值的拷贝。也就是说，一旦输出一个值，模块内部的变化就影响不到这个值
+
+优点：
+
+- 简单并容易使用
+
+缺点：
+
+- 同步加载模块的方式不适合在浏览器环境中，同步意味着阻塞加载
+- 不能非阻塞的并行加载多个模块
+
+实现：
+
+- `Node.js` 的模块化规范是参照 `CommonJS` 实现的
+
+适用场景：
+
+服务器环境
+
+> [文档](http://javascript.ruanyifeng.com/nodejs/module.html#toc2)
+
+&emsp;
+
+##### AMD
+
+`AMD` 规范只有一个主要接口 `define(id?, dependencies?, factory)`，它需要在声明模块的时候指定所有的依赖 `dependencies`，并且还要当做形参传到 `factory` 中，对于依赖的模块**提前执行**，依赖前置。
+
+```js
+define("module", ["dep1", "dep2"], function(d1, d2) {
+  return someExportedValue; // 导出
+});
+require(["module"], function(module) {});
+```
+
+加载和执行机制：异步加载执行
+
+优点：
+
+- 适合在浏览器环境中异步加载模块
+- 可以并行加载多个模块
+
+缺点：
+
+- 提高了开发成本，代码的阅读和书写比较困难，模块定义方式的语义不顺畅
+- 不符合通用的模块化思维方式，是一种妥协的实现
+
+实现：
+
+- `Require.js` 就是参照 `AMD`  规范实现的
+
+适用场景：
+
+浏览器环境
+
+&emsp;
+
+##### CommonJS 和 AMD 的区别
+
+由于`Node.js`主要用于服务器环境，模块文件一般都已经存在于本地硬盘，所以加载起来比较快，不用考虑非同步加载的方式，所以`CommonJS`规范比较适用。但是，如果是浏览器环境，要从服务器端加载模块，这时就必须采用非同步模式，因此浏览器端一般采用`AMD`规范。
+
+&emsp;
+
+##### CMD
+
+`CMD` 是在 `AMD` 基础上改进的一种规范，和 `AMD`  不同在于对依赖模块的**执行时机**处理不同，并且兼容 `CommonJS` 和 `Node.js` 的 `Modules` 规范
+
+```js
+// a.js
+define(function(require, exports, module) {
+  exports.a = 'hello world';
+});
+// b.js
+define(function(require, exports, module) {
+  var module = require('./a.js');
+  console.log(module.a);
+});
+```
+
+加载和执行机制：异步加载执行
+
+优点：
+
+- 就近依赖，延迟执行
+- 可以很容易在 `Node.js` 中运行
+
+缺点：
+
+- 依赖 SPM 打包，模块的加载逻辑偏重
+
+实现：
+
+- `Sea.js` 就是参照 `CMD` 规范实现的
+
+适用场景：
+
+浏览器环境
+
+&emsp;
+
+##### AMD 和 CMD 的区别
+
+`AMD` 和`CMD`  都是异步加载模块。`AMD`  是前置依赖，可以方便知道依赖了哪些模块。`CMD`  是就近依赖，需要把模块变为字符串解析一遍才知道依赖了哪些模块。
+
+`AMD` 在加载模块完成后就会执行该模块，所有模块都加载执行完成后会进入`require`的回调函数，执行主逻辑。这样就会出现依赖模块的执行顺序和书写顺序不一致的情况（如上面 `dep2`先加载完先执行，`dep1`后加载完后执行）。
+
+`CMD`  加载完某个依赖模块后并不执行，在所有依赖模块加载完成后进入主逻辑，遇到`require`语句的时候才执行对应的模块，这样模块的执行顺序和书写顺序是完全一致的。
+
+&emsp;
+
+##### UMD
+
+`UMD` 规范类似于兼容 CommonJS 和 AMD 的语法糖，是模块定义的跨平台解决方案
+
+~~~js
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+       // AMD
+       define(['jquery'], factory); 
+    } else if (typeof exports === 'object') {
+        // CommonJS
+        module.exports = factory(require('jquery'));
+    } else {
+        root.returnExports = factory(root.jQuery);
+    }
+}(this, function($) {
+    // 方法
+    function myFunc() {};
+    // 暴露公共方法
+    return myFunc;
+}));
+~~~
+
+适用场景：
+
+浏览器或服务器环境
+
+&emsp;
+
+##### ESM(ES6 Module)
+
+ES6 模块的设计思想是尽量的静态化，使得编译时就能确定模块的依赖关系，以及输入和输出的变量
+
+```js
+import "jquery";
+export function doStuff() {}
+```
+
+加载和执行机制：编译时加载，运行时执行
+
+优点：
+
+- 容易进行静态分析
+- 面向未来的 ECMAScript 标准
+
+缺点：
+
+- 原生浏览器端还没有实现该标准
+- 全新的命令字，新版的 Node.js 才支持
+
+实现：
+
+- Babel
+
+适用场景：
+
+浏览器或服务器环境（以后可能支持）
+
+&emsp;
