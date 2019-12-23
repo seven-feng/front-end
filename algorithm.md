@@ -329,6 +329,114 @@ browser.forward()
 
 &emsp;
 
+### 队列
+
+~~~js
+class Node {
+  constructor(element) {
+    this.element = element
+    this.next = null
+  }
+}
+
+// 链式队列
+class QueueBasedOnLinkedList {
+  constructor() {
+    this.head = this.tail = null
+  }
+
+  // 入队
+  enQueue(element) {
+    if(this.head === null) {
+      this.head = this.tail = new Node(element)
+      return
+    }
+    this.tail.next = new Node(element)
+    this.tail = this.tail.next
+  }
+
+  // 出队
+  deQueue() {
+    if(this.head === null) {
+      console.log('队空')
+      return
+    }
+    let node = this.head
+    this.head = this.head.next
+    console.log(node.element)
+  }
+}
+
+// 顺序循环队列
+class CircleQueueBasedOnLinearList {
+  constructor(n) {
+    this.items = new Array(n)
+    this.n = n
+    this.head = this.tail = 0
+  }
+
+  enQueue(val) {
+    if((this.tail + 1) % this.n == this.head) {
+      console.log('队满')
+      return
+    }
+    this.items[this.tail] = val
+    this.tail = (this.tail + 1) % this.n
+
+  }
+
+  deQueue() {
+    if(this.head === this.tail) {
+      console.log('队空')
+      return
+    }
+    let val = this.items[this.head]
+    console.log(val)
+    this.head = (this.head + 1) % this.n
+  }
+}
+
+// 链式循环队列
+class CircleQueueBasedOnLinkedList {
+  constructor() {
+    this.head = this.tail = null
+  }
+
+  // 入队
+  enQueue(element) {
+    if(this.head === null) {
+      this.head = this.tail = new Node(element)
+      this.tail.next = this.head
+    } else {
+      let newNode = new Node(element)
+      this.tail.next = newNode
+      this.tail = newNode
+      this.tail.next = this.head
+    }
+  }
+
+  // 出队
+  deQueue() {
+    if(this.head === null) {
+      console.log('队空')
+      return
+    }
+    if(this.head === this.tail) {
+      let node = this.head
+      console.log(node.element)
+      this.head = this.tail = null
+    } else {
+      let node = this.head
+      console.log(node.element)
+      this.head = this.head.next
+      this.tail.next = this.head
+    }
+  }
+}
+~~~
+
+
+
 ### 树
 
 ~~~js
@@ -426,6 +534,10 @@ function removeNode(node,data) {
 
 ### 排序
 
+![algorithm-sort](assets/algorithm-sort.jpg)
+
+
+
 #### 二分排序
 
 ~~~js
@@ -446,6 +558,95 @@ function binarySearch(array, key) {
 
 var a = [1,2,4,6,8,9];
 binarySearch(a, 4);
+~~~
+
+&emsp;
+
+![algorithm-sort1](assets/algorithm-sort1.jpg)
+
+#### 冒泡排序
+
+~~~js
+function bubbleSort(array) {
+    let len = array.length;
+    for(var i = 0; i < len-1; i++) {
+        let flag = false // 提前退出冒泡循环的标志位
+        for(let j = 0; j < len - 1 - i; j++) {
+            if(array[j] > array[j+1]) {
+                let tmp = array[j]
+                array[j] = array[j+1]
+                array[j+1] = tmp
+                flag = true // 表示有数据交换
+            }
+        }
+        if(!flag) break // 没有数据交换，提前退出
+    }
+}
+~~~
+
+&emsp;
+
+#### 插入排序
+
+~~~js
+function insertionSort(array) {
+    const len = array.length;
+    for(let i = 1; i < len; i++) {
+        const value = array[i]
+        let j = i - 1
+        for(; j >= 0; j--) {
+            if(array[j] > value) {
+                array[j+1] = array[j]
+            } else {
+                break
+            }
+        }
+        array[j+1] = value
+    }
+}
+~~~
+
+&emsp;
+
+#### 希尔排序
+
+~~~js
+function shellSort(array) {
+    var len = array.length;
+    var gap = [5,3,1];
+    for(g = 0; g < gap.length; g++) {
+        for(var i = gap[g]; i < len; i++) {
+            for(var j=i; j >= gap[g]; j=j-gap[g]) {
+                if(array[j] < array[j-gap[g]]) {
+                    swap(array[j], array[j-gap[g]])
+                } 
+            }
+        }
+    }
+}
+~~~
+
+ 注意和插入排序的区别！ 
+
+&emsp;
+
+#### 选择排序
+
+~~~js
+function selectionSort(array) {
+    const len = array.length;
+    for(let i = 0; i < len-1; i++) {
+        var min = i;
+        for(let j = i+1; j < len; j++) {
+            if(array[j] < array[min]) {
+                min = j;
+            }
+        }
+        const tmp = array[i]
+        array[i] = array[min]
+        array[min] = tmp
+    }
+}
 ~~~
 
 &emsp;
@@ -485,79 +686,6 @@ quickSort(a,0,4);
 ~~~
 
 &emsp;
-
-#### 冒泡排序
-
-~~~js
-function bubbleSort(array) {
-    var len = array.length;
-    for(var i = 0; i < len-1; i++) {
-        for(var j = 0; j < len-1-i; j++) {
-            if(array[j] > array[j+1]) {
-                swap(array[j],array[j+1]);
-            }
-        }
-    }
-}
-~~~
-
-&emsp;
-
-#### 选择排序
-
-~~~js
-function selectionSort(array) {
-    var len = array.length;
-    for(var i = 0; i < len-1; i++) {
-        var min = i;
-        for(var j = i+1; j < len; j++) {
-            if(array[j] < array[min]) {
-                min = j;
-            }
-        }
-        swap(array[i],array[min]);
-    }
-}
-~~~
-
-&emsp;
-
-#### 插入排序
-
-~~~js
-function insertionSort(array) {
-    var len = array.length;
-    for(var i = 1; i < len; i++) {
-        for(var j=i; j > 0; j--) {
-            if(array[j] < array[j-1]) {
-                swap(array[j], array[j-1])
-            } 
-        }
-    }
-}
-~~~
-
-&emsp;
-
-#### 希尔排序
-
-~~~js
-function shellSort(array) {
-    var len = array.length;
-    var gap = [5,3,1];
-    for(g = 0; g < gap.length; g++) {
-        for(var i = gap[g]; i < len; i++) {
-            for(var j=i; j >= gap[g]; j=j-gap[g]) {
-                if(array[j] < array[j-gap[g]]) {
-                    swap(array[j], array[j-gap[g]])
-                } 
-            }
-        }
-    }
-}
-~~~
-
- 注意和插入排序的区别！ 
 
 &emsp;
 
