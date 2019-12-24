@@ -536,35 +536,11 @@ function removeNode(node,data) {
 
 ![algorithm-sort](assets/algorithm-sort.jpg)
 
-
-
-#### 二分排序
-
-~~~js
-function binarySearch(array, key) {
-    var low = 0, high = array.length, mid;
-    while(low <= high) {
-        mid = (low + high) / 2;
-        if(key < array[mid]) {
-            high = mid - 1;
-        } else if(key > array[mid]) {
-            low = mid + 1;
-        } else {
-            return mid;
-        }
-    }
-    return -1;
-}
-
-var a = [1,2,4,6,8,9];
-binarySearch(a, 4);
-~~~
-
 &emsp;
 
 ![algorithm-sort1](assets/algorithm-sort1.jpg)
 
-#### 冒泡排序
+##### 冒泡排序
 
 ~~~js
 function bubbleSort(array) {
@@ -586,7 +562,7 @@ function bubbleSort(array) {
 
 &emsp;
 
-#### 插入排序
+##### 插入排序
 
 ~~~js
 function insertionSort(array) {
@@ -608,29 +584,32 @@ function insertionSort(array) {
 
 &emsp;
 
-#### 希尔排序
+##### 希尔排序
 
 ~~~js
 function shellSort(array) {
-    var len = array.length;
-    var gap = [5,3,1];
-    for(g = 0; g < gap.length; g++) {
-        for(var i = gap[g]; i < len; i++) {
-            for(var j=i; j >= gap[g]; j=j-gap[g]) {
-                if(array[j] < array[j-gap[g]]) {
-                    swap(array[j], array[j-gap[g]])
-                } 
-            }
+    for(let gap = Math.floor(array.length/2); gap > 0; gap = Math.floor(gap/2)) {
+      for(let i = gap; i < array.length; i++) {
+        let value = array[i]
+        let j = i - gap
+        for(; j >= 0; j -= gap) {
+          if(array[j] > value) {
+            array[j+gap] = array[j]
+          } else {
+            break
+          }
         }
+        array[j+gap] = value
+      }
     }
 }
 ~~~
 
- 注意和插入排序的区别！ 
+希尔排序也是一种插入排序，它是简单插入排序经过改进之后的一个更高效的版本，也称为**缩小增量排序**。
 
 &emsp;
 
-#### 选择排序
+##### 选择排序
 
 ~~~js
 function selectionSort(array) {
@@ -651,7 +630,7 @@ function selectionSort(array) {
 
 &emsp;
 
-#### 快速排序
+##### 快速排序
 
 ~~~js
 function quickSort(array, left, right) {
@@ -683,9 +662,100 @@ function patition(array,left,right) {
 
 var a = [1,2,3,5,4];
 quickSort(a,0,4);
+
+// 第K大的数——分区思想——时间复杂度O(n)
+function kthNumber(array, k) {
+  if(k > array.length) {
+    return -1
+  }
+  let left = 0, right = array.length -1
+  while(left <= right) {
+    let index = patition(array, left, right)
+    if(index + 1 === k) {
+      return array[index]
+    } else if(index + 1 < k) {
+      left = index  + 1
+    } else {
+      right = index - 1
+    }
+  }
+}
+
+function patition(array, left, right) {
+  let begin = left, end = right, key = array[right]
+  while(begin < end) {
+    while(begin < end && array[begin] >= key) begin++
+    while(begin < end && array[end] <= key) end--
+    let tmp = array[begin]
+    array[begin] = array[end]
+    array[end] = tmp
+  }
+  let tmp = array[begin]
+  array[begin] = array[right]
+  array[right] = tmp
+  return begin
+}
 ~~~
 
 &emsp;
+
+##### 归并排序
+
+~~~js
+function mergeSort(array, left, right) {
+  if(left >= right) return
+  let mid = Math.floor((left + right) / 2)
+  mergeSort(array, left, mid)
+  mergeSort(array, mid + 1, right)
+  merge(array, left, mid, right)
+}
+
+function merge(array, left, mid, right) {
+  let arr = [], i = left, j = mid + 1
+  while(i <= mid && j <= right) {
+    if(array[i] <= array[j]) {
+      arr.push(array[i++])
+    } else {
+      arr.push(array[j++])
+    }
+  }
+  while(i <= mid) {
+    arr.push(array[i++])
+  }
+  while(j <= right) {
+    arr.push(array[j++])
+  }
+  for(let z = left; z <= right; z++) {
+    array[z] = arr[z-left]
+  }
+}
+~~~
+
+
+
+#### 二分查找
+
+~~~js
+function binarySearch(array, key) {
+    var low = 0, high = array.length, mid;
+    while(low <= high) {
+        mid = (low + high) / 2;
+        if(key < array[mid]) {
+            high = mid - 1;
+        } else if(key > array[mid]) {
+            low = mid + 1;
+        } else {
+            return mid;
+        }
+    }
+    return -1;
+}
+
+var a = [1,2,4,6,8,9];
+binarySearch(a, 4);
+~~~
+
+
 
 &emsp;
 
