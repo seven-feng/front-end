@@ -174,3 +174,121 @@ resolve 和 reject 函数被调用时，分别将 promise 的状态改为 fulfil
 
 then 是链式的，可以返回一个 Promise 对象，也可以返回一个值，都会被下一个then的回调函数接收。
 
+&emsp;
+
+### Set
+
+无重复值的有序列表
+
+~~~ js
+// 创建 Set
+let set = new Set();
+// 添加值
+set.add(5);
+set.add("5");
+// 返回值的个数
+console.log(set.size); // 2
+// 检测值是否存在
+console.log(set.has(5)); // true
+console.log(set.has(6)); // false
+// 移除值
+set.delete(5);
+// 移除所有值
+set.clear();
+
+// Set 构造器可以接收任意可迭代对象作为参数
+let set = new Set([1, 2, 3, 4, 5, 5, 5, 5]);
+console.log(set.size); // 5
+
+// forEach 方法，value 与 key 相同, ownerSet 是目标 Set 自身
+let set = new Set([1, 2]);
+set.forEach(function(value, key, ownerSet) {
+	console.log(key + " " + value);
+	console.log(ownerSet === set);
+});
+
+// 将 Set 转换为数组
+let set = new Set([1, 2, 3, 3, 3, 4, 5]);
+let array = [...set];
+console.log(array); // [1,2,3,4,5]
+~~~
+
+### Weak Set
+
+该类型只允许存储对象**弱引用**，而不能存储基本类型的值。对象的弱引用在它自己成为该对象的唯一引用时，不会阻止垃圾回收。
+
+~~~ js
+let set = new WeakSet(), key = {};
+// 将对象加入 set
+set.add(key);
+console.log(set.has(key)); // true
+// 移除对于键的最后一个强引用，同时从 Weak Set 中移除
+key = null;
+~~~
+
+### Set 和 Weak Set 区别
+
+1. 对于 WeakSet 的实例，若调用 add() 方法时传入了非对象的参数，就会抛出错误（has() 或 delete() 则会在传入了非对象的参数时返回 false ）
+2. Weak Set 不可迭代，因此不能被用在 for-of 循环中
+3. Weak Set 无法暴露出任何迭代器（例如 keys() 与 values() 方法），因此没有任何编程手段可用于判断 Weak Set 的内容
+4. Weak Set 没有 forEach() 方法
+5. Weak Set 没有 size 属性
+
+&emsp;
+
+### Map
+
+键值对的有序列表，键和值都可以是任意类型，键的比较使用的是 Object.is()
+
+~~~ js
+// 创建 Map
+let map = new Map();
+// 添加项
+map.set("name", "Nicholas");
+map.set("age", 25);
+// 返回键值对个数
+console.log(map.size); // 2
+// 判断指定的键是否存在于 Map 中
+console.log(map.has("name")); // true
+console.log(map.get("name")); // "Nicholas"
+// 移除 Map 中的键以及对应的值
+map.delete("name");
+// 移除 Map 中所有的键与值
+map.clear();
+
+// Map 初始化
+// 将数组传递给 Map 构造器，以便使用数据来初始化一个 Map 。该数组中的每一项也必须是数组，内部数组的首个项会作为键，第二项则为对应值
+let map = new Map([["name", "Nicholas"], ["age", 25]]);
+// forEach 方法
+map.forEach(function(value, key, ownerMap) {
+	console.log(key + " " + value);
+	console.log(ownerMap === map);
+});
+~~~
+
+### Weak Map
+
+Weak 版本都是存储对象弱引用的方式。在 Weak Map 中，所有的**键**都必须是对象（尝试使用非对象的键会抛出错误），而且这些对象都是弱引用，不会干扰垃圾回收。当 Weak Map 中的**键**在 Weak Map 之外不存在引用时，该键值对会被移除。
+
+WeakMap 类型是键值对的无序列表，其中键必须是非空的对象，值则允许是任意类型。
+
+~~~js
+let map = new WeakMap(), element = document.querySelector(".element");
+map.set(element, "Original");
+let value = map.get(element);
+console.log(value); // "Original"
+// 移除元素
+element.parentNode.removeChild(element);
+element = null;
+// 该 Weak Map 在此处为空
+
+// Weak Map 只有两个附加方法 has() 和 delete()，能用来与键值对交互
+let map = new WeakMap(), element = document.querySelector(".element");
+map.set(element, "Original");
+console.log(map.has(element)); // true
+console.log(map.get(element)); // "Original"
+map.delete(element);
+console.log(map.has(element)); // false
+console.log(map.get(element)); // undefined
+~~~
+

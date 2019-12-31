@@ -753,6 +753,18 @@ function binarySearch(array, key) {
 
 var a = [1,2,4,6,8,9];
 binarySearch(a, 4);
+
+// 递归写法
+function binarySearch(array, low, high, value) {
+  let mid = Math.floor(low + (high - low) / 2)
+  if(array[mid] === value) {
+    return mid
+  } else if(array[mid] < value) {
+    return binarySearch(array, mid + 1, high, value)
+  } else {
+    return binarySearch(array, low, mid - 1, value)
+  }
+}
 ~~~
 
 
