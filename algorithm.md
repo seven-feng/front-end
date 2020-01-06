@@ -461,14 +461,14 @@ function insert(data) {
         var node = this.root;
         while(true) {
             if(data < node.data) {
-                if(node.left = null) {
+                if(node.left === null) {
                     node.left = new Node(data,null,null);
                     break;
                 } else {
                     node = node.left;
                 }
             } else if(data > node.data) {
-                if(node.right = null) {
+                if(node.right === null) {
                     node.right = new Node(data,null,null);
                     break;
                 } else {
@@ -531,6 +531,150 @@ function removeNode(node,data) {
 ~~~
 
 &emsp;
+
+### 二叉查找树
+
+~~~js
+class Node {
+  constructor(data) {
+    this.data = data
+    this.left = null
+    this.right = null
+  }
+}
+
+class BST {
+  constructor() {
+    this.root = null
+  } 
+
+  // 插入
+  insert(data) {
+    if(this.root === null) {
+      this.root = new Node(data)
+      return
+    }
+    let p = this.root
+    while(p !== null) {
+      if(data < p.data) {
+        if(p.left === null) {
+          p.left = new Node(data)
+          return
+        }
+        p = p.left
+      } 
+      else {
+        if(p.right === null) {
+          p.right = new Node(data)
+          return
+        }
+        p = p.right
+      } 
+    }
+  }
+
+  // 中序遍历
+  inOrder(node) {
+    if(node === null) return
+    this.inOrder(node.left)
+    console.log(node.data)
+    this.inOrder(node.right)
+  }
+
+  // 查询
+  find(data) {
+    let p = this.root
+    while(p !== null) {
+      if(data < p.data) p = p.left
+      else if(data > p.data) p = p.right
+      else return p
+    }
+    return null
+  }
+
+  // 删除(非递归)
+  remove1(data) {
+    let pp = null // 指向删除节点的父节点
+    let p = this.root
+
+    while(p !== null && p.data !== data) { // 查找被删除的节点
+      pp = p
+      if(data < p.data) p = p.left
+      else p = p.right
+    }
+    if(p === null) return
+
+    if(p.left !== null && p.right !== null) { // 如果被删除节点存在左右子树
+      let minpp = p							  // 则用右子树的最小节点代替
+      let minp = p.right
+      while(minp.left !== null) {
+        minpp = minp
+        minp = minp.left
+      }
+      p.data = minp.data // 替换被删除节点
+      pp = minpp // 同后续逻辑，删除右子树最小节点
+      p = minp
+    }
+    
+    let child // 保存被删除节点子树
+    if(p.left !== null) { // 如果被删除节点只存在左子树
+      child = p.left
+    }
+    else if(p.right !== null) { // 如果被删除节点只存在右子树
+      child = p.right
+    } else { // 如果被删除节点不存在左右子树
+      child = null
+    }
+
+    if(pp === null) this.root = child // 删除根节点
+    if(pp.left === p) pp.left = child
+    else pp.right = child
+  }
+
+  // 删除（递归）
+  remove(node, data) {
+    if(data === node.data) {
+      if(node.left === null && node.right === null) {
+        return null
+      } else if(node.left !== null && node.right === null) {
+        return node.left
+      } else if(node.right !== null && node.left === null) {
+        return node.right
+      } else {
+        let p = node.right
+        while(p.left !== null) {
+          p = p.left
+        }
+        node.data = p.data
+        node.right = this.remove(node.right, p.data)
+        return node
+      }
+    } else if(data < node.data) {
+      node.left = this.remove(node.left, data)
+      return node
+    } else {
+      node.right = this.remove(node.right, data)
+      return node
+    }
+  }
+}
+
+let bst = new BST()
+
+bst.insert(16)
+bst.insert(13)
+bst.insert(15)
+bst.insert(18)
+bst.insert(17)
+bst.insert(25)
+bst.insert(19)
+bst.insert(27)
+
+bst.remove(bst.root, 18)
+bst.inOrder(bst.root)
+~~~
+
+
 
 ### 排序
 
