@@ -674,7 +674,7 @@ bst.remove(bst.root, 18)
 bst.inOrder(bst.root)
 ~~~
 
-
+&emsp;
 
 ### 排序
 
@@ -875,7 +875,99 @@ function merge(array, left, mid, right) {
 }
 ~~~
 
+&emsp;
 
+##### 堆排序
+
+~~~js
+class Heap {
+  constructor() {
+    this.heap = [] // 从下标1开始存储数据
+    this.n = 0
+  }
+
+  insert(data) { // 插入元素
+    let n = ++this.n
+    let heap = this.heap
+    heap[n] = data
+    let i = n
+    while(Math.floor(i/2) > 0 && heap[i] > heap[Math.floor(i/2)]) {
+      this.swap(i, Math.floor(i/2))
+      i = Math.floor(i/2)
+    }
+  }
+
+  remove() { // 删除堆顶元素
+    if(this.n === 0) return
+    this.heap[1] = this.heap[this.n]
+    this.n--
+    this.heapify(this.n, 1)
+  }
+
+  heapify(n, i) { // 自上往下堆化
+    let heap = this.heap
+    while(true) {
+      let max = i
+      if(2*i <= n && heap[i] < heap[2*i]) max = 2*i
+      if(2*i+1 <= n && heap[max] < heap[2*i+1]) max = 2*i+1
+      if(max === i) return
+      this.swap(i,max)
+      i = max
+    }
+  }
+
+  swap(i, j) {
+    let tmp = this.heap[i]
+    this.heap[i] = this.heap[j]
+    this.heap[j] = tmp 
+  }
+}
+
+class HeapSort {
+  constructor(array) {
+    this.heap = array // 从下标1开始存储数据
+    this.n = array.length - 1
+  }
+
+  buildHeap() {
+    let i = Math.floor(this.n/2)
+    while(i) {
+      this.heapify(this.n, i)
+      i--
+    }
+  }
+
+  heapify(n, i) { // 自上往下堆化
+    let heap = this.heap
+    while(true) {
+      let max = i
+      if(2*i <= n && heap[i] < heap[2*i]) max = 2*i
+      if(2*i+1 <= n && heap[max] < heap[2*i+1]) max = 2*i+1
+      if(max === i) return
+      this.swap(i,max)
+      i = max
+    }
+  }
+
+  sort() {
+    this.buildHeap() // 先建堆
+    let i = this.n
+    while(i) {
+      this.swap(1,i)
+      i--
+      this.heapify(i, 1)
+    }
+  }
+
+  swap(i, j) {
+    let tmp = this.heap[i]
+    this.heap[i] = this.heap[j]
+    this.heap[j] = tmp 
+  }
+}
+~~~
+
+&emsp;
 
 #### 二分查找
 
@@ -911,52 +1003,100 @@ function binarySearch(array, low, high, value) {
 }
 ~~~
 
-
-
 &emsp;
 
 ### 图
 
-#### 广搜
-
 ~~~js
-function bfs(s) {
-    this.marked[s] = true;
-    var queue = [];
-    queue.push(s);
-    while(queue.length) {
-        var v = queue.shift();
-        for(var w of this.adj[v]) {
-            if(!this.marked[w]) {
-                queue.push(w);
-                this.EdgeTo[w] = v;
-                this.marked[w] = true;
-            }
-        }
+class Graph {
+  constructor(v) {
+    this.v = v
+    this.pre = [] // 记录搜索路径
+    this.adj = [] // 邻接表
+    for(let i = 0; i < this.v; i++) {
+      this.adj[i] = []
     }
-}
+  }
 
-function pathTo(s,t) {
-    for(var v = t; v !=s; v = this.EdgeTo[v]) {
-        path.push(v);
+  addEdge(s, t) {
+    this.adj[s].push(t)
+    this.adj[t].push(s)
+  }
+
+  bfs(s) { // 广度优先搜索
+    let visited = [] // 标记已被访问的顶点
+    let queue = []   // 队列存储已被访问，但相邻顶点还没被访问的顶点
+    for(let i = 0; i < this.v; i++) {
+      visited[i] = 0
+      this.pre[i] = -1
     }
+    queue.push(s)
+    visited[s] = 1
+    while(queue.length) {
+      let v = queue.shift()
+      for(let w of this.adj[v]) {
+        if(!visited[w]) {
+          queue.push(w)
+          visited[w] = 1
+          this.pre[w] = v
+        }
+      }
+    }
+  }
+
+  dfs(s) { // 深度优先搜索
+    let visited = [] // 标记已被访问的顶点
+    for(let i = 0; i < this.v; i++) {
+      visited[i] = 0
+      this.pre[i] = -1
+    }
+    this.dfsRecursion(s, visited)
+  }
+
+  dfsRecursion(s, visited) {
+    visited[s] = 1
+    for(let w of this.adj[s]) {
+      if(!visited[w]) {
+        this.pre[w] = s
+        this.dfsRecursion(w, visited)
+      }
+    }
+  }
+
+  print(s, t) { // 递归打印 s->t 的路径
+    if(this.pre[t] !== -1 && t !== s) {
+      this.print(s, this.pre[t])
+    }
+    console.log(t + ' ')
+  }
 }
 ~~~
 
 &emsp;
 
-#### 深搜
+### 字符串匹配算法
 
-~~~js
-function dfs(v) {
-    this.marked[v] = true;
-    for(var w of this.adj[v]) {
-        if(!this.marked[w]) {
-            dfs(w);
-        }
-    }
-}
-~~~
+##### BF 算法
+
+BF（Brute Force），暴力匹配算法，又叫朴素匹配算法
+
+实现思路：拿模式串与主串中是所有子串匹配，看是否有能匹配的子串。时间复杂度是 O(n*m)
+
+&emsp;
+
+##### RK 算法
+
+RK（Rabin-Karp）
+
+实现思路：对每个子串分别求哈希值，然后拿子串的哈希值与模式串的哈希值比较。时间复杂度是 O(n)
+
+&emsp;
+
+##### BM 算法
+
+BM（Boyer-Moore）
+
+核心思想：利用模式串本身的特点，在模式串中某个字符与主串不能匹配的时候，将模式串往后多滑动几位，以此来减少不必要的字符比较，提高匹配的效率。BM 算法构建的规则有两类，坏字符规则和好后缀规则。好后缀规则可以独立于坏字符规则使用。因为坏字符规则的实现比较耗内存，为了节省内存，我们可以只用好后缀规则来实现 BM 算法。
 
 &emsp;
 
