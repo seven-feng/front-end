@@ -1096,7 +1096,62 @@ RK（Rabin-Karp）
 
 BM（Boyer-Moore）
 
-核心思想：利用模式串本身的特点，在模式串中某个字符与主串不能匹配的时候，将模式串往后多滑动几位，以此来减少不必要的字符比较，提高匹配的效率。BM 算法构建的规则有两类，坏字符规则和好后缀规则。好后缀规则可以独立于坏字符规则使用。因为坏字符规则的实现比较耗内存，为了节省内存，我们可以只用好后缀规则来实现 BM 算法。
+核心思想：利用模式串本身的特点，在模式串中某个字符与主串不能匹配的时候，将模式串往后多滑动几位，以此来减少不必要的字符比较，提高匹配的效率。BM 算法构建的规则有两类，坏字符规则和好后缀规则。坏字符规则，拿坏字符在模式串中从后往前查找相同的坏字符。好后缀规则，拿好后缀在模式串中从后往前查找子串，如果没有，拿好后缀的后缀子串匹配模式串的前缀子串。
+
+&emsp;
+
+##### KMP 算法
+
+KMP（Knuth Morris Pratt）
+
+核心思想：借鉴 BM 算法，总结为好前缀规则，拿好前缀的后缀子串与好前缀的前缀子串匹配。
+
+&emsp;
+
+### Tire 树
+
+~~~js
+// 字典树
+class Node {
+  constructor(data) {
+    this.data = data
+    this.children = new Array(26)
+    this.isEndingChar  = false
+  }
+}
+
+class Tire {
+  constructor() {
+    this.root = new Node('/')
+  }
+
+  insert(text) {
+    let p = this.root
+    let i = 0
+    for(let c of text) {
+      let index = c.charCodeAt() - 'a'.charCodeAt()
+      if(!p.children[index]) {
+        p.children[index] = new Node(c)
+      }
+      p = p.children[index]
+    }
+    p.isEndingChar = true
+  }
+
+  find(text) {
+    let p = this.root
+    for(let c of text) {
+      let index = c.charCodeAt() - 'a'.charCodeAt()
+      if(!p.children[index]) {
+        return false
+      } else {
+        p = p.children[index]
+      }
+    }
+    return p.isEndingChar
+  }
+}
+~~~
 
 &emsp;
 
