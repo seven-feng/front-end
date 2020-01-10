@@ -1108,7 +1108,9 @@ KMP（Knuth Morris Pratt）
 
 &emsp;
 
-### Tire 树
+##### Tire 树
+
+Tire 树是一种多模式串匹配算法，优势在于查找前缀匹配的字符串，比如搜索引擎中的关键词提示功能，是个比较经典的应用场景
 
 ~~~js
 // 字典树
@@ -1151,6 +1153,111 @@ class Tire {
     return p.isEndingChar
   }
 }
+~~~
+
+&emsp;
+
+##### AC 自动机
+
+AC 自动机（Aho-Corasick），经典的多模式串匹配算法。整个 AC 自动机算法包含两个部分：第一部分是将多个模式串构建成 AC 自动机（1.将模式串构建成 Trie 树 2.在 Trie 树上构建失败指针），第二部分是在 AC 自动机中匹配主串。
+
+~~~js
+class ACNode {
+  constructor(data) {
+    this.data = data
+    this.children = new Map()
+    this.fail = null
+    this.length = 0
+    this.isEndingChar = false
+  }
+}
+
+class ACTree {
+  constructor() {
+    this.root = new ACNode('/')
+  }
+
+  insert(text) { // 将多个模式串构建成 Trie 树
+    let p = this.root
+    for(let c of text) {
+      if(!p.children.has(c)) {
+        p.children.set(c, new ACNode(c))
+      }
+      p = p.children.get(c)
+    }
+    p.isEndingChar = true
+    p.length = text.length
+  }
+
+  buildFailurePointer() { // 在 Trie 树上构建失败指针
+    let root = this.root
+    let queue = []
+    queue.push(root)
+    while(queue.length) {
+      let p = queue.shift()
+      for(let pc of p.children.values()) {
+        if(!pc) return
+        if(p === root) {
+          pc.fail = root
+        } else {
+          let q = p.fail
+          while(q) {
+            let qc = q.children.get(pc.data)
+            if(qc) {
+              pc.fail = qc
+              break
+            }
+            q = q.fail
+          }
+          if(!q) {
+            pc.fail = root
+          }
+        }
+
+        queue.push(pc)
+      }
+    }
+  }
+
+  match(text) { // 匹配主串
+    let root = this.root
+    let n = text.length
+    let p = root
+    for(let i = 0; i < n; i++) {
+      let c = text[i]
+      while(!p.children.get(c) && p !== root) {
+        p = p.fail
+      }
+
+      p = p.children.get(c)
+      if(!p) { // 如果没有匹配的，从root开始重新匹配
+        p = root
+      }
+
+      let tmp = p
+      while(tmp !== root) {
+        if(tmp.isEndingChar === true) {
+          console.log(`start from ${i - p.length + 1}, length: ${p.length}`)
+        }
+        tmp = tmp.fail
+      }
+    }
+  }
+}
+
+function match(text, patterns) {
+  let automata = new ACTree()
+
+  for (let pattern of patterns) {
+      automata.insert(pattern);
+  }
+  automata.buildFailurePointer()
+  automata.match(text)
+}
+
+let patterns2 = ["Fxtec Pro1", "谷歌Pixel"];
+let text2 = "一家总部位于伦敦的公司Fxtex在MWC上就推出了一款名为Fxtec Pro1的手机，该机最大的亮点就是采用了侧滑式全键盘设计。DxOMark年度总榜发布 华为P20 Pro/谷歌Pixel 3争冠";
+match(text2, patterns2);
 ~~~
 
 &emsp;
