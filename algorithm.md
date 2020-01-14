@@ -1264,65 +1264,181 @@ match(text2, patterns2);
 
 ### 动态规划
 
-#### 最长公共子串
+##### 最长公共连续子串
 
 ~~~js
 function lcs(word1,word2) {
-    var len1 = word1.length;
-    var len2 = word2.length;
-    var lcs = new Array(len1+1);
-    for(var i = 0; i <= len1; i++) {
-        lcs[i] = new Array(len2+1);
-        for(var j = 0; j < len2; j++) {
-            lcs[i][j] = 0;
-        }
-    }
-    var max = 0, index = -1;
-    for(i = 0; i <= len1; i++) {
-        for(j = 0; j <= len2; j++) {
-            if(i==0 || j==0) {
-                lcs[i][j] = 0;
-            }
-            if(word1[i] == word2[j]) {
-                lcs[i][j] = lcs[i-1][j-1] + 1;
+  let len1 = word1.length
+  let len2 = word2.length
+  let lcs = []
+  for(let i = 0; i <= len1; i++) {
+      lcs[i] = []
+      for(let j = 0; j <= len2; j++) {
+          lcs[i][j] = 0
+      }
+  }
+  let max = 0, index = 0
+  for(let i = 0; i <= len1; i++) {
+      for(let j = 0; j <= len2; j++) {
+          if(i==0 || j==0) {
+              lcs[i][j] = 0
+          } else {
+            if(word1[i-1] == word2[j-1]) {
+              lcs[i][j] = lcs[i-1][j-1] + 1
             } else {
-                lcs[i][j] = 0;
+                lcs[i][j] = 0
             }
-            if(lcs[i][j] > max) {
-                index = i;
-                max = lcs[i][j];
-            }
-        }
-    }
-    var str = "";
-    for(i = max-index; i < index; i++) {
-        str += word1[i];
-    }
+          }
+
+          if(lcs[i][j] > max) {
+              index = i
+              max = lcs[i][j]
+          }
+      }
+  }
+  let str = ''
+  for(let i = index-max; i < index; i++) {
+      str += word1[i]
+  }
 }
 ~~~
 
 &emsp;
 
-#### 背包
+##### 0-1 背包
 
 ~~~js
-function dknapsack(capacity,size,value,n) {
-    var k = [];
-    for(var i = 0; i <= n; i++) {
-        k[i] = [];
+// weight：物品重量，value：物品价值，w：背包可承载重量，n：物品个数
+// 一维
+function knapsack(weight, value, w, n) {
+  let k = []
+  for(let i = 0; i <= w; i++) {
+    k[i] = 0
+  }
+
+  for(let i = 0; i < n; i++) {
+    for(let j = w; j >=weight[i]; j--) { // 从后往前，可以防止重复计算
+      k[j] = Math.max(k[j-weight[i]] + value[i], k[j])
+    }
+  }
+}
+
+// 二维
+function knapsack(weight, value, w, n) {
+  let k = []
+  for(let i = 0; i < n; i++) {
+    k[i] = []
+  }
+
+  for(let i = 0; i < n; i++) 
+    for(let j = 0; j <= w; j++) {
+      k[i][j] = 0
     }
 
-    for(var i = 0; i <= n; i++) {
-        for(var w = 0; w <= capacity; w++) {
-            if(i == 0 || w == 0) {
-                k[i][w] = 0;
-            } else if(w >= size[i-1]) {
-                k[i][w] = max(k[i-1][w-size[i-1]] + value[i-1],k[i-1][w]);
-            } else {
-                k[i][w] = k[i-1][w];
-            }
-        }
+  k[0][weight[0]] = value[0] 
+  for(let i = 1; i < n; i++) {
+    for(let j = weight[i]; j <=w; j++) {
+      k[i][j] = Math.max(k[i-1][j], k[i-1][j-weight[i]] + value[i])
     }
+  }
+}
+~~~
+
+&emsp;
+
+##### 量化两个字符串的相似度
+
+编辑距离（Edit Distance），将一个字符串转化成另一个字符串，需要的最少编辑操作次数（比如增加一个字符、删除一个字符、替换一个字符）。编辑距离越大，说明两个字符串的相似程度越小；相反，编辑距离就越小，说明两个字符串的相似程度越大。对于两个完全相同的字符串来说，编辑距离就是 0。
+
+根据所包含的编辑操作种类的不同，编辑距离有多种不同的计算方式，比较著名的有**莱文斯坦距离**（Levenshtein distance）和**最长公共子串长度**（Longest common substring length）。其中，莱文斯坦距离允许**增加、删除、替换字符**这三个编辑操作，最长公共子串长度只允许**增加、删除字符**这两个编辑操作。
+
+&emsp;
+
+~~~js
+// 莱温斯坦距离——可直接计算编辑距离
+function lwst(a, b) {
+  let m = a.length
+  let n = b.length
+  let minDist = []
+  for(let i = 0; i < m; i++) {
+    minDist[i] = []
+    for(let j = 0; j < n; j++) {
+      minDist[i][j] = 0
+    }
+  }
+
+  for(let i = 0; i < m; i++) { // 初始化第0列:a[0..i]与b[0..0]的编辑距离
+    if(b[0] === a[i]) {
+      minDist[i][0] = i
+    } else if(i !== 0){
+      minDist[i][0] = minDist[i-1][0] + 1
+    }
+  }
+
+  for(let j = 0; j < n; j++) { // 初始化第0行:a[0..0]与b[0..j]的编辑距离
+    if(a[0] === b[j]) {
+      minDist[0][j] = j
+    } else if(j !== 0){
+      minDist[0][j] = minDist[j-1][0] + 1
+    }
+  }
+  
+  for(let i = 1; i < m; i++)
+    for(let j = 1; j < n; j++) {
+      if(a[i] === b[j]) {
+        minDist[i][j] = 
+            Math.min(minDist[i-1][j]+1, minDist[i][j-1]+1, minDist[i-1][j-1])
+      } else {
+        minDist[i][j] = 
+            Math.min(minDist[i-1][j]+1, minDist[i][j-1]+1, minDist[i-1][j-1]+1)
+      }
+    }
+
+  console.log(minDist[m-1][n-1])  
+}
+~~~
+
+&emsp;
+
+~~~js
+// 最长公共子串长度（不连续）——需要进一步计算，才能计算得到编辑距离
+function lcs(a, b) {
+  let m = a.length
+  let n = b.length
+  let lcs = []
+  for(let i = 0; i < m; i++) {
+    lcs[i] = []
+    for(let j = 0; j < n; j++) {
+      lcs[i][j] = 0
+    }
+  }
+
+  for(let i = 0; i < m; i++) {
+    if(a[i] === b[0]) {
+      lcs[i][0] = 1
+    } else if(i !== 0){
+      lcs[i][0] = lcs[i-1][0]
+    }
+  }
+
+  for(let i = 0; i < n; i++) {
+    if(a[0] === b[i]) {
+      lcs[0][i] = 1
+    } else if(i !== 0){
+      lcs[0][i] = lcs[i-1][0]
+    }
+  }
+  
+  for(let i = 1; i < m; i++)
+    for(let j = 1; j < n; j++) {
+      if(a[i] === b[j]) {
+        lcs[i][j] = Math.max(lcs[i-1][j-1]+1, lcs[i-1][j], lcs[i][j-1])
+      } else {
+        lcs[i][j] = Math.max(lcs[i-1][j-1], lcs[i-1][j], lcs[i][j-1])
+      }
+    }
+    
+  console.log(lcs[m-1][n-1])  
 }
 ~~~
 
