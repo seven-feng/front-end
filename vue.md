@@ -114,3 +114,85 @@ vue.js 采用数据劫持结合发布-订阅模式的方式，通过 Object.defi
 5. 读取数据属性的值，能够触发该属性的 get 拦截函数，从而收集依赖。但是其子属性是没有被读取的，所以也不能够收集依赖，千万要和定义响应式区分开来。
 
 6. 如果计算属性 `compA` 依赖了数据对象的 `a` 属性，那么属性 `a` 将收集计算属性 `compA` 的 **计算属性观察者对象**，而 **计算属性观察者对象** 将收集 **渲染函数观察者对象**，实际上是属性`a`收集了**渲染函数观察者对象**，所以改变属性`a`的值，会触发渲染函数重新执行。
+
+
+
+### Vue SSR
+
+##### 什么是服务端渲染（SSR）
+
+Vue.js 是构建客户端应用程序的框架。默认情况下，可以在浏览器中输出 Vue 组件，进行生成 DOM 和操作 DOM。然而，也可以将同一个组件渲染为服务器端的 HTML 字符串，将它们直接发送到浏览器，最后将这些静态标记"激活"为客户端上完全可交互的应用程序。
+
+服务器渲染的 Vue.js 应用程序也可以被认为是"同构"或"通用"，因为应用程序的大部分代码都可以在**服务器**和**客户端**上运行。
+
+
+
+##### 为什么用服务端渲染
+
+与传统 SPA (Single-Page Application) 相比，服务器端渲染的优势主要在于：
+
+- 更好的 SEO，由于搜索引擎爬虫抓取工具可以直接查看完全渲染的页面。
+- 更快的内容到达时间 (time-to-content)，特别是对于缓慢的网络情况或运行缓慢的设备。无需等待所有的 JavaScript 都完成下载并执行，你的用户将会更快速地看到完整渲染的页面，可以产生更好的用户体验。
+
+
+
+##### vue-hackernews-2.0
+
+官方示例项目
+
+![hn-architecture](assets/hn-architecture.png)
+
+[客户端应用程序和服务器应用程序](https://wangfuda.github.io/2017/05/14/vue-hackernews-2.0-code-explain/)，都要使用 webpack 打包 ：服务器需要「server bundle」然后用于服务器端渲染(SSR)，而「client bundle」会发送到浏览器，用于混合静态标记。
+
+> bundle 可理解为打包后的东西
+
+服务端应用程序需要打包的原因：	
+
+- 通常 Vue 应用程序是由 webpack 和 vue-loader 构建的，并且许多 webpack 特定功能不能直接在 Node.js 中运行（例如通过 `file-loader` 导入文件，通过 `css-loader` 导入 CSS）。
+- 尽管 Node.js 最新版本能够完全支持 ES2015 特性，我们还是需要转译客户端代码以适应老版浏览器。这也会涉及到构建步骤。
+
+此外，bundle renderer 还具有以下优点：
+
+- 内置的 source map 支持（在 webpack 配置中使用 `devtool: 'source-map'`）
+- 在开发环境甚至部署过程中热重载（通过读取更新后的 bundle，然后重新创建 renderer 实例）
+- 关键 CSS(critical CSS) 注入（在使用 `*.vue` 文件时）：自动内联在渲染过程中用到的组件所需的CSS。
+- 使用 [clientManifest](https://ssr.vuejs.org/zh/api/#clientmanifest) 进行资源注入：自动推断出最佳的预加载(preload)和预取(prefetch)指令，以及初始渲染所需的代码分割 chunk。
+
+
+
+##### 详细过程
+
+服务器端：当 node server 收到来自 browser 的请求后，会创建一个 Vue 渲染器 Bundle Renderer，它会读取 server bundle（可选读取 template 页面模版和 clientManifest 客户端构建清单）并执行。 server bundle 实现了数据预取并返回已填充数据的 Vue 实例，接下来 Vue 渲染器内部就会将 Vue 实例渲染进 html 模板，最后把这个完整的 html 发送到 browser。
+
+Bundle Renderer 具有 client manifest 和 server bundle 之后，可以自动推断和注入资源预加载 / 数据预取指令(preload / prefetch directive)，以及 css 链接 / script 标签到所渲染的 html。
+
+优点在于：
+
+- 在生成的文件名中有哈希时，可以取代 html-webpack-plugin 来注入正确的资源 URL。
+- 在通过 webpack 的按需代码分割特性渲染 bundle 时，我们可以确保对 chunk 进行最优化的资源预加载/数据预取，并且还可以将所需的异步 chunk 智能地注入为 \<script\> 标签，以避免客户端的瀑布式请求 (waterfall request)，以及改善可交互时间 (TTI - time-to-interactive)。
+
+默认情况下，当提供 template 渲染选项时，资源注入是自动执行的。
+
+
+
+客户端：当 browser 收到 html 后，开始加载 client bundle，然后以激活模式进行挂载（Vue 在浏览器端接管由服务端发送的静态 html，使其变为由 Vue 管理的动态 DOM）。
+
+客户端激活原因：由于服务器已经渲染好了 html，显然无需将其丢弃再重新创建所有的 DOM 元素。相反，可以“激活"这些静态的 html，然后使他们成为动态的（能够响应后续的数据变化）。
+
+
+
+### Nuxt.js
+
+Nuxt.js 是一个基于 Vue.js 的通用应用框架。
+
+通过对客户端/服务端基础架构的抽象组织，Nuxt.js 主要关注的是应用的 **UI渲染**。
+
+我们的目标是创建一个灵活的应用框架，你可以基于它初始化新项目的基础结构代码，或者在已有 Node.js 项目中使用 Nuxt.js。
+
+Nuxt.js 预设了利用 Vue.js 开发**服务端渲染**的应用所需要的各种配置。
+
+我们还提供了一种命令叫：`nuxt generate` ，为基于 Vue.js 的应用提供生成对应的静态站点的功能。
+
+作为框架，Nuxt.js 为 `客户端/服务端` 这种典型的应用架构模式提供了许多有用的特性，例如异步数据加载、中间件支持、布局支持等。
+
+​	
