@@ -788,3 +788,8 @@ export function doStuff() {}
 浏览器或服务器环境（以后可能支持）
 
 &emsp;
+
+### DOMContentLoaded 和 Load
+
+- DOMContentLoaded，这个事件发生后，说明页面已经构建好 DOM 了，这意味着构建 DOM 所需要的 HTML 文件、JavaScript 文件、CSS 文件都已经下载完成了。
+- Load，说明浏览器已经加载了所有的资源（图像、样式表等）。

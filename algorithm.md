@@ -879,6 +879,9 @@ function merge(array, left, mid, right) {
 
 ##### 堆排序
 
+- 堆是一颗完全二叉树
+- 堆中每一个节点的值都必须大于等于（或小于等于）其子树中每个节点的值
+
 ~~~js
 class Heap {
   constructor() {
@@ -1018,7 +1021,12 @@ class Graph {
     }
   }
 
-  addEdge(s, t) {
+  addEdge(s, t) { // 无向图
+    this.adj[s].push(t)
+    this.adj[t].push(s)
+  }
+    
+  addEdge1(s, t) { // 有向图
     this.adj[s].push(t)
     this.adj[t].push(s)
   }
@@ -1069,10 +1077,212 @@ class Graph {
     }
     console.log(t + ' ')
   }
+    
+  topoSortByKahn() { // 拓扑排序——Kahn 算法
+    let inDegree = new Array(this.v)
+    for(let i = 0; i < this.v; i++) { // 初始化顶点的入度数组
+      inDegree[i] = 0
+    }
+    for(let i = 0; i < this.v; i++) {
+      for(let j = 0; j < this.adj[i].length; j++) { // 计算每个顶点的入度
+        let w = this.adj[i][j]
+        inDegree[w]++
+      }
+    }
+
+    let queue = []
+    for(let i = 0; i < this.v; i++) {
+      if(inDegree[i] === 0) {
+        queue.push(i)
+      }
+    }
+    while(queue.length) {
+      let v = queue.shift()
+      console.log(' --> ' + v)
+      for(let j = 0; j < this.adj[v].length; j++) {
+        let w = this.adj[v][j]
+        inDegree[w]--
+        if(inDegree[w] === 0) {
+          queue.push(w)
+        }
+      }
+    }
+  }
+    
+  topoSortByDFS() { // 拓扑排序——深度优先遍历
+    // 算法应用场景：编译器通过源文件两两之间的局部依赖关系，确定一个全局的编译顺序
+    // 邻接表中，边 s->t 表示 s 先于 t 执行
+    // 逆邻接表中，边 s->t 表示 s 依赖于 t，s 后于 t 执行
+    // 依赖关系需要构建逆邻接表
+    let visited = []
+    let inverseAdj = []
+    for(let i = 0; i < this.v; i++) {
+      visited[i] = false
+      inverseAdj[i] = []
+    }
+    
+    for(let i = 0; i < this.v; i++) {
+      for(let w of this.adj[i]) {
+        inverseAdj[w].push(i)
+      }
+    }
+      
+
+    for(let i  = 0; i < this.v; i++) {
+      if(!visited[i]) {
+        this.DFS(i, visited, inverseAdj)
+      }
+    }
+  }
+
+  DFS(v, visited, inverseAdj) {
+    visited[v] = true
+    for(let w of inverseAdj[v]) {
+      if(!visited[w]) {
+        this.DFS(w, visited, inverseAdj)
+      }
+    }
+    // 先把顶点可达的所有顶点都打印出来之后，再打印它自己（使用逆邻接表）
+    console.log(' --> ' + v)
+  }
 }
 ~~~
 
 &emsp;
+
+##### 单源最短路径算法——Dijkstra 算法
+
+从优先级队列中取出 dist 最小的顶点 minVertex，然后考察这个顶点可达的所有顶点（代码中的 nextVertex）。如果 minVertex 的 dist 值加上 minVertex 与 nextVertex 之间边的权重 w 小于 nextVertex 当前的 dist 值，也就是说，存在另一条更短的路径，它经过 minVertex 到达 nextVertex。那就把 nextVertex 的 dist 更新为 minVertex 的 dist 值加上 w。然后，把 nextVertex 加入到优先级队列中。重复这个过程，直到找到终止顶点 t 或者队列为空。
+
+~~~js
+class Edge {
+  constructor(sid, tid, w) {
+    this.sid = sid
+    this.tid = tid
+    this.w = w
+  }
+}
+
+class Vertex {
+  constructor(id, dist) {
+    this.id = id
+    this.dist = dist
+  }
+}
+
+class PriorityQueue {
+  constructor(v) {
+    this.heap = []
+    this.n = 0
+  }
+
+  isEmtpy() {
+    return this.n === 0? true: false
+  }
+
+  add(vertex) {
+    let i = ++this.n
+    this.heap[i] = vertex
+    while(Math.floor(i/2) && this.heap[i].dist < this.heap[Math.floor(i/2)].dist) {
+        this.swap(i, Math.floor(i/2))
+        i = Math.floor(i/2)
+    }
+  }
+
+  update(vertex) {
+    for(let v of this.heap) {
+      if(v.id === vertex.id) {
+        v.dist = vertex.dist
+      }
+    }
+  }
+
+  poll() {
+    if(this.n === 0) return
+    let vertex = this.heap[1]
+    this.heap[1] = this.heap[this.n]
+    this.n--
+    this.heapify(this.n, 1)
+    return vertex
+  }
+
+  heapify(n, i) {
+    while(true) {
+      let max = i
+      if(i*2 <=n && this.heap[i].dist > this.heap[i*2].dist) max = 2*i
+      if(i*2+1 <=n && this.heap[i].dist > this.heap[i*2+1].dist) max = 2*i+1
+      if(max === i) return
+      this.swap(i, max)
+      i = max
+    }
+  }
+
+  swap(i, j) {
+    let tmp = this.heap[i]
+    this.heap[i] = this.heap[j]
+    this.heap[j] = tmp
+  }
+}
+
+class Graph {
+  constructor(v) {
+    this.v = v
+    this.pre = [] // 记录搜索路径
+    this.adj = [] // 邻接表
+    for(let i = 0; i < this.v; i++) {
+      this.adj[i] = []
+    }
+  }
+
+  addEdge2(s, t, w) { // 有向有权图
+    this.adj[s].push(new Edge(s, t, w))
+  }
+
+  dijkstra(s, t) { // 从顶点s到顶点t的最短路径
+    let vertextes = []
+    let inQueue = []
+    let predecessor = [] 
+    for(let i = 0; i < this.v; i++) {
+      vertextes[i] = new Vertex(i, Number.MAX_VALUE)
+      inQueue[i] = false
+    }
+    vertextes[s].dist = 0 // 起点距离为0
+    let queue = new PriorityQueue()
+    queue.add(vertextes[s])
+    while(!queue.isEmtpy()) {
+      let minVertex = queue.poll() // 取堆顶元素并删除
+      if(minVertex.id === t) break // 最短路径产生了
+      for(let e of this.adj[minVertex.id]) {
+        let nextVertex = vertextes[e.tid]
+        if(minVertex.dist + e.w < nextVertex.dist) {
+          nextVertex.dist = minVertex.dist + e.w
+          predecessor[nextVertex.id] = minVertex.id
+          if(inQueue[nextVertex.id]) {
+            queue.update(nextVertex)
+          } else {
+            queue.add(nextVertex)
+            inQueue[nextVertex.id] = true
+          }
+        }
+      }
+    }
+    this.print(s, t, predecessor)
+  }
+
+  print(s, t, predecessor) {
+    if(t === s) {
+      console.log(t)
+      return
+    }
+    this.print(s, predecessor[t], predecessor)
+    console.log(t)
+  }
+}
+~~~
+
+
+
+
 
 ### 字符串匹配算法
 
