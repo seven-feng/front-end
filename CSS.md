@@ -103,7 +103,13 @@ Flex（Flexible Box）意为弹性布局
 
 采用 Flex 布局的元素，称为 Flex 容器（flex container），简称”容器”。它的所有子元素自动成为容器成员，称为Flex 项目（flex item），简称”项目”
 
-&emsp;
+~~~ css
+.box{
+  display: flex;
+}
+~~~
+
+
 
 容器属性：flex-direction、flex-wrap、flex-flow、justify-content、align-items、align-content
 
