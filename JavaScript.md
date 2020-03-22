@@ -193,7 +193,7 @@ function debounce(func, delay) {
     if(timer) {
       clearTimeout(timer);
     }
-    timer = setTimeout(func,delay);
+    timer = setTimeout(() => func.call(this),delay);
   }
 }
 window.onscroll = debounce(lazyLoad,1000);
@@ -207,16 +207,15 @@ window.onscroll = debounce(lazyLoad,1000);
 function throttle(func, delay) {
   var timer = null, pre = 0;
   return function() {
-    var context = this;
     var cur = Date.now();
     var remain = delay - (cur - pre);
     clearTimeout(timer);
     if (remain <= 0) {
-      func.apply(context);
+      func.call(this);
       pre = Date.now();
     } else {
-      timer = setTimeout(function() {
-        func.apply(context);
+      timer = setTimeout(() => {
+        func.call(this);
         pre = Date.now();
       }, remain)
     }
