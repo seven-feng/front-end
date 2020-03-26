@@ -1,6 +1,6 @@
 ### typeof 和 instanceof
 
-基本类型：Undefined、Null、Boolean、Number、String、BigInt
+基本类型：Undefined、Null、Boolean、Number、String、BigInt、Symbol
 
 引用类型：
 
@@ -126,13 +126,88 @@ Object.prototype.hasOwnProperty(prop) 方法会返回一个布尔值，指示对
 
 &emsp;
 
-### 组合使用构造函数模式与原型模式
+### 实现继承的几种方式
+
+##### 原型链继承
+
+利用原型让一个引用类型继承另一个引用类型的属性和方法
+
+~~~js
+function SuperType() {
+    this.name = 'seven';
+}
+
+SuperType.prototype.sayName = function() {
+    console.log(this.name)
+}
+
+function SubType() {
+    this.age = 10
+}
+
+SubType.prototype = new SuperType()
+SubType.prototype.sayAge = function() {
+    console.log(this.age)
+}
+SubType.prototype.constructor = SubType
+
+
+let sub = new SubType()
+sub.sayName()
+sub.sayAge()
+~~~
+
+> 缺点：
+>
+> 1. 通过原型来实现继承时，原型会变成另一个类型的实例，原先的实例属性变成了现在的原型属性，该原型的引用类型属性会被所有的实例共享。
+>
+> 2. 在创建子类型的实例时，没有办法在不影响所有对象实例的情况下给超类型的构造函数中传递参数。
+
+
+
+##### 借用构造函数
+
+在子类型的构造函数中调用超类型构造函数
+
+~~~js
+function SuperType(name) {
+    this.name = name
+    this.sayName = function() {
+        console.log(this.name)
+    }
+}
+    
+function SubType(name, age) {
+    SuperType.call(this, name)
+    this.age = age
+    this.sayAge = function() {
+        console.log(this.age)
+    }
+}
+
+let sub = new SubType('seven', 10)
+sub.sayName()
+sub.sayAge()
+~~~
+
+> 优点：
+>
+> 1. 可以向超类传递参数
+> 2. 解决了原型中包含引用类型值被所有实例共享的问题
+>
+> 缺点：
+>
+> 1. 方法都在构造函数中定义，函数复用无从谈起，另外超类型原型中定义的方法对于子类型而言都是不可见的。
+
+
+
+##### 组合使用构造函数模式与原型模式
 
 构造函数模式用于定义实例属性，而原型模式用于定义方法和共享的属性
 
 ``` javascript
 function SuperType(name) {
-    this.name = name;
+    this.name = name
 }
 
 SuperType.prototype.sayName = function() {
@@ -140,20 +215,117 @@ SuperType.prototype.sayName = function() {
 }
 
 function SubType(name,age) {
-    SuperType.call(this,name);
-    this.age = age;
+    SuperType.call(this,name)
+    this.age = age
 }
 
-SubType.prototype = new SuperType();
-
+SubType.prototype = new SuperType()
+SubType.prototype.constructor = SubType
 SubType.prototype.sayAge = function() {
-    console.log(this.age);
+    console.log(this.age)
 }
 
-var sub = new SubType('zhangsan',29);
-sub.sayAge();
-sub.sayName();
+var sub = new SubType('seven', 10)
+sub.sayAge()
+sub.sayName()
 ```
+
+> 优点：
+>
+> 1. 可以向超类传递参数
+> 2. 每个实例都有自己的属性
+> 3. 实现了函数复用
+>
+> 缺点：
+>
+> 1. 无论什么情况下，都会调用两次超类型构造函数：一次是在创建子类型原型的时候，另一次是在子类型构造函数内部
+
+
+
+##### 原型式继承
+
+借助原型可以基于已有的对象创建新对象，同时还不必因此创建自定义类型
+
+~~~js
+function object(o) {
+    function F() {}
+    F.prototype = o
+    return new F()
+}
+~~~
+
+> 缺点：
+>
+> 1. 同原型链实现继承一样，包含引用类型值的属性会被所有实例共享
+
+
+
+##### 寄生式继承
+
+创建一个仅用于封装继承过程的函数，该函数在内部已某种方式来增强对象，最后再像真地是它做了所有工作一样返回对象
+
+~~~js
+function createAnother(original) {
+    let clone = object(original) // 原型式继承函数
+    clone.sayHi = function() {
+        console.log('hi')
+    }
+    return clone
+}
+~~~
+
+> 缺点：
+>
+> 1. 使用寄生式继承来为对象添加函数，会由于不能做到函数复用而效率低下。
+> 2. 同原型链实现继承一样，包含引用类型值的属性会被所有实例共享。
+
+
+
+##### 寄生组合式继承
+
+不必为了指定子类型的原型而调用超类型的构造函数，我们需要的仅是超类型原型的一个副本，本质上就是使用寄生式继承来继承超类型的原型，然后再将结果指定给子类型的原型
+
+~~~js
+function object(o) {
+    function F() {}
+    F.prototype = o
+    return new F()
+}
+
+function inheritPrototype(subType, superType) {
+    let prototype = object(superType.prototype)
+    prototype.constructor = subType
+    subType.prototype = prototype
+}
+
+function SuperType(name) {
+    this.name = name
+}
+
+SuperType.prototype.sayName = function() {
+    console.log(this.name);
+}
+
+function SubType(name,age) {
+    SuperType.call(this,name)
+    this.age = age
+}
+
+inheritPrototype(SubType, SuperType)
+SubType.prototype.sayAge = function() {
+    console.log(this.age)
+}
+
+var sub = new SubType('seven', 10)
+sub.sayAge()
+sub.sayName()
+~~~
+
+> 优点：
+>
+> 只调用了一次超类构造函数，效率更高。避免在 `SuberType.prototype`上面创建不必要的、多余的属性，与其同时，原型链还能保持不变。
+
+**因此寄生组合继承是引用类型最理性的继承范式。**
 
 &emsp;
 

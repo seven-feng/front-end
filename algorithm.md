@@ -684,6 +684,10 @@ bst.inOrder(bst.root)
 
 ![algorithm-sort1](assets/algorithm-sort1.jpg)
 
+> 原地排序（Sorted in place），就是特指空间复杂度是 O(1) 的排序算法。
+
+
+
 ##### 冒泡排序
 
 ~~~js
