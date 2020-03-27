@@ -294,7 +294,7 @@ console.log(map.get(element)); // undefined
 
 ### async 函数
 
-ES2017 标准引入了 async 函数，使得异步操作变得更加方便。
+ES7 标准引入了 async 函数，使得异步操作变得更加方便。
 
 async 函数是什么？一句话，它就是 Generator 函数的语法糖。
 
