@@ -610,3 +610,115 @@ const router = new VueRouter({
 不过这种模式要玩好，还需要后台配置支持。因为我们的应用是个单页客户端应用，如果后台没有正确的配置，当用户在浏览器直接访问 `http://oursite.com/user/id` 就会返回 404，这就不好看了。
 
 所以呢，你要在服务端增加一个覆盖所有情况的候选资源：如果 URL 匹配不到任何静态资源，则应该返回同一个 `index.html` 页面，这个页面就是你 app 依赖的页面。
+
+
+
+### Vue 组件间的通信方式
+
+方法一：props / $emit
+
+1. 父组件向子组件传值
+
+   ~~~vue
+   //App.vue父组件
+   <template>
+     <div id="app">
+       <users v-bind:users="users"></users>
+     </div>
+   </template>
+   <script>
+   import Users from "./components/Users"
+   export default {
+     name: 'App',
+     data(){
+       return{
+         users:["Henry","Bucky","Emily"]
+       }
+     },
+     components:{
+       "users":Users
+     }
+   }
+   </script>
+   ~~~
+
+   ~~~vue
+   //users子组件
+   <template>
+     <div class="hello">
+       <ul>
+         <li v-for="user in users">{{user}}</li>
+       </ul>
+     </div>
+   </template>
+   <script>
+   export default {
+     name: 'HelloWorld',
+     props:{
+       users:{
+         type: Array,
+         required: true
+       }
+     }
+   }
+   </script>
+   ~~~
+
+   
+
+2. 子组件向父组件传值（通过事件形式）
+
+
+
+方法二：$emit / $on
+
+这种方法通过一个空的 Vue 实例作为中央事件总线（事件中心），用它来触发事件和监听事件,巧妙而轻量地实现了任何组件间的通信，包括父子、兄弟、跨级。当我们的项目比较大时，可以选择更好的状态管理解决方案 vuex。
+
+具体实现方式：
+
+~~~js
+var eventBus = new Vue()
+eventBus.$emit(事件名, 数据)
+eventBus.$on(事件名, data => {})
+~~~
+
+
+
+方法三：Vuex
+
+这个就不多说了。
+
+说一下 Vuex 与 localStorage
+
+vuex 是 vue 的状态管理器，存储的数据是响应式的。但是并不会保存起来，刷新之后就回到了初始状态，**具体做法应该在 vuex 里数据改变的时候把数据拷贝一份保存到 localStorage 里面，刷新之后，如果 localStorage 里有保存的数据，取出来再替换 store 里的 state。**
+
+~~~js
+let defaultCity = "上海"
+try {   // 用户关闭了本地存储功能，此时在外层加个try...catch
+  if (!defaultCity){
+    defaultCity = JSON.parse(window.localStorage.getItem('defaultCity'))
+  }
+} catch(e){
+}
+export default new Vuex.Store({
+  state: {
+    city: defaultCity
+  },
+  mutations: {
+    changeCity(state, city) {
+      state.city = city
+      try {
+          // 数据改变的时候把数据拷贝一份保存到localStorage里面
+          window.localStorage.setItem('defaultCity', JSON.stringify(state.city));
+      } catch (e) {
+      }
+    }
+  }
+})
+~~~
+
+
+
+方法四：$attrs / $listeners
+
+https://blog.fundebug.com/2019/05/18/6-ways-for-vue-communication/
