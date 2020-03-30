@@ -617,62 +617,69 @@ const router = new VueRouter({
 
 方法一：props / $emit
 
-1. 父组件向子组件传值
+父组件 A 通过 props 向子组件 B 传值，子组件 B 通过触发 $emit 事件向父组件 A 传值
 
-   ~~~vue
-   //App.vue父组件
-   <template>
-     <div id="app">
-       <users v-bind:users="users"></users>
-     </div>
-   </template>
-   <script>
-   import Users from "./components/Users"
-   export default {
-     name: 'App',
-     data(){
-       return{
-         users:["Henry","Bucky","Emily"]
-       }
-     },
-     components:{
-       "users":Users
-     }
-   }
-   </script>
-   ~~~
+~~~vue
+// A.vue 父组件
+<template>
+  <div>
+    <div>{{ title }}</div>
+    <B v-bind:users="users" @showTitle="handleTitle"></B>
+  </div>
+</template>
+<script>
+import B from "./B"
+export default {
+  name: 'A',
+  data() {
+    return{
+      title: '',
+      users:["Henry","Bucky","Emily"]
+    }
+  },
+  components:{
+    B
+  },
+  methods: {
+      handleTitle(title) {
+        this.title = title
+      }
+  }
+}
+</script>
+~~~
 
-   ~~~vue
-   //users子组件
-   <template>
-     <div class="hello">
-       <ul>
-         <li v-for="user in users">{{user}}</li>
-       </ul>
-     </div>
-   </template>
-   <script>
-   export default {
-     name: 'HelloWorld',
-     props:{
-       users:{
-         type: Array,
-         required: true
-       }
-     }
-   }
-   </script>
-   ~~~
-
-   
-
-2. 子组件向父组件传值（通过事件形式）
+~~~vue
+// B.vue 子组件
+<template>
+  <div>
+    <div>{{ users }}</div>
+    <button @click="click">click me</button>
+  </div>
+</template>
+<script>
+export default {
+  name: 'B',
+  props:{
+    users:{
+      type: Array,
+      required: true
+    }
+  },
+  methods: {
+      click() {
+          this.$emit('showTitle', 'my friends')
+      }
+  }
+}
+</script>
+~~~
 
 
 
 方法二：$emit / $on
 
-这种方法通过一个空的 Vue 实例作为中央事件总线（事件中心），用它来触发事件和监听事件,巧妙而轻量地实现了任何组件间的通信，包括父子、兄弟、跨级。当我们的项目比较大时，可以选择更好的状态管理解决方案 vuex。
+这种方法通过一个空的 Vue 实例作为中央事件总线（事件中心），用它来触发事件和监听事件,巧妙而轻量地实现了任何组件间的通信，包括父子、兄弟、跨级。
 
 具体实现方式：
 
@@ -682,11 +689,49 @@ eventBus.$emit(事件名, 数据)
 eventBus.$on(事件名, data => {})
 ~~~
 
+~~~js
+// vue 根实例
+new Vue({
+  data() {
+    return {
+      eventBus: new Vue()
+    }
+  },
+  created() {
+    this.eventBus.$on('sayHi', msg => {
+      console.log(msg)
+    })
+  },
+  render: h => h(A),
+}).$mount('#app')
+~~~
+
+~~~vue
+// B.vue 孙组件
+<template>
+  <div>
+    <button @click="click">click me</button>
+  </div>
+</template>
+<script>
+export default {
+  name: 'B',
+  methods: {
+      click() {
+          this.$root.eventBus.$emit('sayHi', 'hi')
+      }
+  }
+}
+</script>
+~~~
+
+当然，eventBus 还可以通过 provide / inject 注入，后面会介绍。
+
 
 
 方法三：Vuex
 
-这个就不多说了。
+当项目比较大时，状态管理解决方案 vuex 是更好的选择
 
 说一下 Vuex 与 localStorage
 
@@ -721,4 +766,222 @@ export default new Vuex.Store({
 
 方法四：$attrs / $listeners
 
-https://blog.fundebug.com/2019/05/18/6-ways-for-vue-communication/
+`$attrs`：包含了父作用域中不被 prop 所识别 (且获取) 的特性绑定 (class 和 style 除外)。当一个组件没有声明任何 prop 时，这里会包含所有父作用域的绑定 (class 和 style 除外)，并且可以通过 v-bind=”\$attrs” 传入内部组件。通常配合 interitAttrs 选项一起使用。
+
+> 在组件定义中添加 inheritAttrs：false，组件将不会把未被注册的 props 呈现为普通的 HTML 属性。也就是说，在 HTML 上不会渲染出来。
+
+`$listeners`：包含了父作用域中的 (不含 .native 修饰器的) v-on 事件监听器。它可以通过 v-on=”\$listeners” 传入内部组件。
+
+~~~vue
+<template>
+  <div id="app">
+    <h2>{{ doo }}</h2>
+    <A :foo="foo" :boo="boo" :coo="coo" @changeDoo="changeDoo"></A>
+  </div>
+</template>
+
+<script>
+import A from '@/components/A'
+export default {
+  name: 'App',
+  components: {
+    A
+  },
+  data() {
+    return {
+      foo: "Javascript",
+      boo: "Html",
+      coo: "CSS",
+      doo: "Vue"
+    }
+  },
+  methods: {
+    changeDoo(val) {
+      this.doo = val
+    }
+  }
+}
+</script>
+~~~
+
+~~~ vue
+<template>
+  <div>
+    <p>foo: {{ foo }}</p>
+    <p>A 的 $attrs: {{ $attrs }}</p>
+    <B v-bind="$attrs" v-on="$listeners"></B>
+  </div>
+</template>
+<script>
+import B from './B'
+export default {
+  components: {
+    B
+  },
+  inheritAttrs: false,
+  props: {
+    foo: String
+  },
+  created() {
+    console.log(this.$attrs); // { "boo": "Html", "coo": "CSS" }
+  }
+}
+</script>
+~~~
+
+~~~vue
+<template>
+  <div>
+    <p>boo: {{ boo }}</p>
+    <p>B 的 $attrs: {{ $attrs }}</p>
+    <button @click="click">click me</button>
+  </div>
+</template>
+<script>
+export default {
+  props: {
+    boo: String
+  },
+  created() {
+    console.log(this.$attrs); // { "coo": "CSS" }
+  },
+  methods: {
+      click() {
+          this.$emit('changeDoo', 'react')
+      }
+  }
+}
+</script>
+~~~
+
+简单来说：`$attrs` 里存放的是父组件中绑定的非 props 属性，`$listeners` 里存放的是父组件中绑定的非原生事件，两者用法相似。
+
+
+
+方法五：provide / inject
+
+祖先组件中通过 provider 来提供，然后在子孙组件中通过 inject 来注入依赖。
+**provide / inject API 主要解决了跨级组件间的通信问题，不过它的使用场景，主要是子组件获取上级组件的状态，跨级组件间建立了一种主动提供与依赖注入的关系**。
+
+改造一下方法二的栗子：
+
+~~~js
+// 祖先组件
+new Vue({
+  data() {
+    return {
+      eventBus: new Vue()
+    }
+  },
+  provide() {
+    return {
+      eventBus: this.eventBus
+    }
+  },
+  created() {
+    this.eventBus.$on('sayHi', msg => {
+      console.log(msg)
+    })
+  },
+  render: h => h(A),
+}).$mount('#app')
+~~~
+
+~~~ vue
+// B.vue 子孙组件
+<template>
+  <div>
+    <button @click="click">click me</button>
+  </div>
+</template>
+<script>
+export default {
+  name: 'B',
+  inject: ['eventBus'],
+  methods: {
+      click() {
+          this.eventBus.$emit('sayHi', 'hi')
+      }
+  }
+}
+</script>
+~~~
+
+
+
+方法六：$parent / $children / ref
+
+`ref`：如果在普通的 DOM 元素上使用，引用指向的就是 DOM 元素；如果用在子组件上，引用就指向组件实例
+
+`$parent` / `$children`：访问父 / 子实例
+
+~~~vue
+// A.vue 父组件
+<template>
+  <div>
+    <B ref="comB"/>
+  </div>
+</template>
+<script>
+import B from './B'
+export default {
+  components: {
+    B
+  },
+  data() {
+      return {
+          name: 'i am a'
+      }
+  },
+  mounted () {
+    const comB = this.$refs.comB
+    console.log('ref: ' + comB.title)  // Vue.js
+    console.log('$children: ' + this.$children[0].title)  // Vue.js
+  }
+}
+</script>
+~~~
+
+~~~vue
+// B.vue 子组件
+<template>
+  <div>
+    <div>{{ title }}</div>
+  </div>
+</template>
+<script>
+export default {
+  data () {
+    return {
+      title: 'Vue.js'
+    }
+  },
+  mounted() {
+      console.log('$parent: ' + this.$parent.name)
+  }
+}
+</script>
+~~~
+
+
+
+**总结**
+
+常见使用场景可以分为三类：
+
+- 父子通信：
+  父向子传递数据是通过 props，子向父是通过 events（$emit）
+
+  通过父链 / 子链也可以通信（$parent / $children）
+
+  ref 也可以访问组件实例
+
+  provide / inject
+
+  $attrs / $listeners
+
+- 兄弟通信：
+  Bus；Vuex
+
+- 跨级通信：
+  Bus；Vuex；provide / inject；$attrs / $listeners
