@@ -1566,6 +1566,8 @@ function knapsack(weight, value, w, n) {
 
 根据所包含的编辑操作种类的不同，编辑距离有多种不同的计算方式，比较著名的有**莱文斯坦距离**（Levenshtein distance）和**最长公共子串长度**（Longest common substring length）。其中，莱文斯坦距离允许**增加、删除、替换字符**这三个编辑操作，最长公共子串长度只允许**增加、删除字符**这两个编辑操作。
 
+而且，莱文斯坦距离和最长公共子串长度，从两个截然相反的角度，分析字符串的相似程度。莱文斯坦距离的大小，表示两个字符串**差异**的大小；而最长公共子串的大小，表示两个字符串**相似程度**的大小。
+
 &emsp;
 
 ~~~js
@@ -1586,6 +1588,8 @@ function lwst(a, b) {
       minDist[i][0] = i
     } else if(i !== 0){
       minDist[i][0] = minDist[i-1][0] + 1
+    } else {
+        minDist[i][0] = 1
     }
   }
 
@@ -1593,7 +1597,9 @@ function lwst(a, b) {
     if(a[0] === b[j]) {
       minDist[0][j] = j
     } else if(j !== 0){
-      minDist[0][j] = minDist[j-1][0] + 1
+      minDist[0][j] = minDist[0][j-1] + 1
+    } else {
+        minDist[0][j] = 1
     }
   }
   
@@ -1655,4 +1661,6 @@ function lcs(a, b) {
   console.log(lcs[m-1][n-1])  
 }
 ~~~
+
+
 
