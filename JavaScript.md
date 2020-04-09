@@ -19,6 +19,7 @@
 |        | 123n                    | bigint    |
 |        |                         | undefined |
 |        | null （对应 Null 类型） | object    |
+|        | undefined               | undefined |
 |        | new Object()            | object    |
 |        | function() {}           | function  |
 

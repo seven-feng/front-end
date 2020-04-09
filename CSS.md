@@ -18,7 +18,7 @@ element width （元素实际宽度） = width
 
 ### css优先级
 
-!important > 行内样式 > ID 选择器 > 类选择器 > 标签 > 通配符 > 继承
+!important > 行内样式 > ID 选择器 > 类选择器 > 标签选择器 > 通配符 > 继承
 
 行内样式：1,0,0,0
 
