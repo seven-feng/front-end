@@ -20,11 +20,11 @@ ViewModel 层，视图模型层，用于连接 View 层和 Model 层。一方面
 
 1. 通过虚拟 DOM 减少 DOM 操作
 
-   虚拟 DOM 采用 js 对象模拟一颗简单的 DOM 树，任何 DOM 操作都会在 VNode 上进行，最后新旧 VNode 进行对比（优化），一次性将比较结果更新到 DOM 树上。由于不需要频繁操作 DOM，大大提高了性能（js 计算的开销比 DOM 操作要小的多）。
+   虚拟 DOM 采用 js 对象模拟一颗简单的 DOM 树，任何 DOM 操作都会在 VNode 上进行，最后新旧 VNode 进行对比（优化），最后将比较结果更新到 DOM 树上。由于减少了不必要的 DOM 操作 ，大大提高了性能（js 计算的开销比 DOM 操作要小的多）。
 
 2. 双向数据绑定
 
-   Vue 基于 MVVM 架构。在 MVVM 中， View 层和 Model 层不能直接通信，需要通过 ViewModel 层进行连接。当数据发生变化时，ViewModel 监听数据变化，更新视图；当用户操作视图时，ViewModel 监听视图变化，通知数据改动。Vue 实现双向数据绑定，可以让开发者不再操作 DOM 对象，专注于业务逻辑。
+   Vue 基于 MVVM 架构。在 MVVM 中， View 层和 Model 层不能直接通信，需要通过 ViewModel 层进行连接。当数据发生变化时，ViewModel 监听数据变化，更新视图；当用户操作视图时，ViewModel 监听视图变化，通知数据改动。Vue 实现双向数据绑定，可以让开发者不再直接操作 DOM 对象，专注于业务逻辑。
 
 3. 组件化开发
 
@@ -79,6 +79,64 @@ vue.js 采用数据劫持结合发布-订阅模式的方式，通过 Object.defi
 ### 虚拟DOM
 
 用 js 对象模拟 DOM 节点，用户交互时操作虚拟 DOM，然后通过 diff 算法比较操作前后的虚拟 DOM，最后将 diff 结果更新到实际 DOM 上
+
+> 真实 DOM 树抽象成以 js 对象为节点的虚拟树，创建、修改、删除节点等操作只会对虚拟 DOM 做修改，然后通过 diff 算法得出修改的最小单位，更新到视图上。
+
+##### 优点
+
+虚拟 DOM 具有批处理和高效的 diff 算法，最终表现在 DOM 上的修改只是变更的部分，可以保证非常高效的渲染，优化性能。
+
+##### 缺点
+
+首次渲染大量 DOM 时，由于多了一层虚拟 DOM 的计算，会比 innerHTML 插入慢。
+
+
+
+patch 的核心 diff 算法，通过同层的树节点进行比较，时间复杂度只有 O(n)，是一种相当高效的算法。
+
+![diff](https://i.loli.net/2017/08/27/59a2419a3c617.png)
+
+这两张图代表旧的 VNode 与新 VNode 进行 patch 的过程，他们只是在同层级的 VNode 之间进行比较得到变化（第二张图中相同颜色的方块代表互相进行比较的 VNode 节点），然后修改变化的视图，所以十分高效。
+
+![img](https://i.loli.net/2017/08/28/59a4015bb2765.png)
+
+首先，在新老两个 VNode 节点的左右头尾两侧都有一个变量标记，在遍历过程中这几个变量都会向中间靠拢。当oldStartIdx > oldEndIdx 或者 newStartIdx > newEndIdx 时结束循环。
+
+在遍历中，如果存在key，并且满足sameVnode，会将该DOM节点进行复用，否则则会创建一个新的DOM节点。
+
+当新老VNode节点的start或者end满足sameVnode时，也就是sameVnode(oldStartVnode, newStartVnode)或者sameVnode(oldEndVnode, newEndVnode)，直接将该VNode节点进行patchVnode即可。
+
+![img](https://i.loli.net/2017/08/28/59a40c12c1655.png)
+
+如果oldStartVnode与newEndVnode满足sameVnode，即sameVnode(oldStartVnode, newEndVnode)。
+
+这时候说明oldStartVnode已经跑到了oldEndVnode后面去了，进行patchVnode的同时还需要将真实DOM节点移动到oldEndVnode的后面。
+
+![img](https://ooo.0o0.ooo/2017/08/28/59a4214784979.png)
+
+如果oldEndVnode与newStartVnode满足sameVnode，即sameVnode(oldEndVnode, newStartVnode)。
+
+这说明oldEndVnode跑到了oldStartVnode的前面，进行patchVnode的同时真实的DOM节点移动到了oldStartVnode的前面。
+
+![img](https://i.loli.net/2017/08/29/59a4c70685d12.png)
+
+如果以上情况均不符合，则通过createKeyToOldIdx会得到一个oldKeyToIdx，里面存放了一个key为旧的VNode的key，value为对应index序列的哈希表。从这个哈希表中可以找到是否有与newStartVnode一致key的旧的VNode节点，如果同时满足sameVnode，patchVnode的同时会将这个真实DOM（elmToMove）移动到oldStartVnode对应的真实DOM的前面。
+
+![img](https://i.loli.net/2017/08/29/59a4d7552d299.png)
+
+当然也有可能找不到一致的key，或者是即便key相同却不是sameVnode，这个时候会调用createElm创建一个新的DOM节点。
+
+![img](https://i.loli.net/2017/08/29/59a4de0fa4dba.png)
+
+到这里循环已经结束了，那么剩下我们还需要处理多余或者不够的真实DOM节点。
+
+1. 当结束时oldStartIdx > oldEndIdx，这个时候老的VNode节点已经遍历完了，但是新的节点还没有。说明了新的VNode节点实际上比老的VNode节点多，也就是比真实DOM多，需要将剩下的（也就是新增的）VNode节点插入到真实DOM节点中去，此时调用addVnodes（**批量调用**createElm的接口将这些节点加入到真实DOM中去）。
+
+![img](https://i.loli.net/2017/08/29/59a509f0d1788.png)
+
+2. 同理，当newStartIdx > newEndIdx时，新的VNode节点已经遍历完了，但是老的节点还有剩余，说明真实DOM节点多余了，需要从文档中删除，这时候调用removeVnodes将这些多余的真实DOM删除。
+
+![img](https://i.loli.net/2017/08/29/59a4f389b98cb.png)
 
 &emsp;
 
