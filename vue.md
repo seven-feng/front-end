@@ -22,9 +22,13 @@ ViewModel 层，视图模型层，用于连接 View 层和 Model 层。一方面
 
    虚拟 DOM 采用 js 对象模拟一颗简单的 DOM 树，任何 DOM 操作都会在 VNode 上进行，最后新旧 VNode 进行对比（优化），最后将比较结果更新到 DOM 树上。由于减少了不必要的 DOM 操作 ，大大提高了性能（js 计算的开销比 DOM 操作要小的多）。
 
-2. 双向数据绑定
+2. 响应式（双向数据绑定）
 
-   Vue 基于 MVVM 架构。在 MVVM 中， View 层和 Model 层不能直接通信，需要通过 ViewModel 层进行连接。当数据发生变化时，ViewModel 监听数据变化，更新视图；当用户操作视图时，ViewModel 监听视图变化，通知数据改动。Vue 实现双向数据绑定，可以让开发者不再直接操作 DOM 对象，专注于业务逻辑。
+   通过 Object.defineProperty() 定义对象属性的 getter 和 setter，触发 getter 时进行收集依赖，当数据变更时，触发 setter 通知所有订阅者进行回调。
+
+   Vue 实现双向数据绑定，可以让开发者不再直接操作 DOM 对象，专注于业务逻辑。
+
+   > Vue 基于 MVVM 架构。在 MVVM 中， View 层和 Model 层不能直接通信，需要通过 ViewModel 层进行连接。当数据发生变化时，ViewModel 监听数据变化，更新视图；当用户操作视图时，ViewModel 监听视图变化，通知数据改动。
 
 3. 组件化开发
 
@@ -33,8 +37,6 @@ ViewModel 层，视图模型层，用于连接 View 层和 Model 层。一方面
    优点：组件高内聚低耦合，便于测试和复用
 
    ​			开发易于管理和协同，提高开发效率
-
-> 发现两种双向数据绑定的理解：一种是 View 层和 ViewModel 层的绑定，一种是 View 层和 Model 层的绑定。其实，两个都有道理，前者适用于 Vue 框架，而后者基于整个 MVVM 架构。
 
 &emsp;
 
@@ -68,11 +70,34 @@ ViewModel 层，视图模型层，用于连接 View 层和 Model 层。一方面
 
 &emsp;
 
-### vue 原理
+### vue 响应式原理
 
 vue.js 采用数据劫持结合发布-订阅模式的方式，通过 Object.defineProperty() 来劫持各个属性的setter、getter，在数据变动时发布消息给订阅者，触发相应的监听回调
 
 > 属性描述符：数据描述符和存取描述符
+
+~~~js
+function defineReactive(obj, key, val) {
+    let dep = new Dep()
+    Object.defineProperty(obj, key, {
+        enumerable: true,
+        configurable: true,
+        getter: function() {
+            if(Dep.target) {
+                dep.depend()
+            }
+            return val
+        },
+        setter: function(newVal) {
+            if(val !== newVal) {
+                dep.notify()
+            }
+        }
+    })
+}
+~~~
+
+
 
 &emsp;
 
