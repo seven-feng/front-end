@@ -971,3 +971,17 @@ export function doStuff() {}
 # 尾调用优化
 
 https://www.ruanyifeng.com/blog/2015/04/tail-call.html
+
+
+
+### == 和 ===
+
+相等和全等运算符
+
+
+
+### 作用域
+
+作用域是可以有效访问变量或函数的区域
+
+JS 有三种类型的作用域：全局作用域、函数作用域、块作用域
