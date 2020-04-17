@@ -1618,6 +1618,24 @@ function lwst(a, b) {
 }
 ~~~
 
+##### 感悟
+
+根据回溯算法分析，得到如下状态转移：
+
+<img src="assets/Levenshtein distance0.jpg" alt="Levenshtein distance" style="zoom:50%;" />
+
+发现，都是根据当前状态，递推下一个状态。**通过回溯，可以确定有几个状态转移**。
+
+使用动态规划去解决这个问题，就要考虑**多阶段决策最优解模型**。**根据上一状态和当前值，得到当前状态**。
+
+<img src="assets/Levenshtein distance.jpg" alt="Levenshtein distance" style="zoom:50%;" />
+
+##### 区分
+
+回溯算法是根据当前状态，递推下一状态，是一种发散式的；动态规划是根据上一状态和当前值，选择一种最优状态，是一种归约式的。
+
+关于状态转移，额外再提一句，在莱温斯坦算法中，从 min_edist(i-1, j) 到 min_edist(i,  j)，由于多出一个 i，而且没有跟他匹配的，所以“差异”要加1；同理，在最长公共子串中，从 max_lcs(i-1, j) 到 max_lcs(i,  j)，由于多出一个 i，而且没有跟他匹配的，所以“相似”不变。
+
 &emsp;
 
 ~~~js
