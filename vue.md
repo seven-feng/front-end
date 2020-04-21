@@ -22,13 +22,13 @@ ViewModel 层，视图模型层，用于连接 View 层和 Model 层。一方面
 
    虚拟 DOM 采用 js 对象模拟一颗简单的 DOM 树，任何 DOM 操作都会在 VNode 上进行，最后新旧 VNode 进行对比（优化），最后将比较结果更新到 DOM 树上。由于减少了不必要的 DOM 操作 ，大大提高了性能（js 计算的开销比 DOM 操作要小的多）。
 
-2. 响应式（双向数据绑定）
+2. 响应式
 
-   通过 Object.defineProperty() 定义对象属性的 getter 和 setter，触发 getter 时进行收集依赖，当数据变更时，触发 setter 通知所有订阅者进行回调。
-
-   Vue 实现双向数据绑定，可以让开发者不再直接操作 DOM 对象，专注于业务逻辑。
+   vue 采用数据劫持结合发布-订阅模式的方式，通过 Object.defineProperty() 定义对象属性的 getter 和 setter，触发 getter 时进行收集依赖，当数据变更时，触发 setter 通知所有订阅者进行回调。Vue 通过响应式在修改数据时更新视图，可以让开发者不再直接操作 DOM 对象，专注于业务逻辑。
 
    > Vue 基于 MVVM 架构。在 MVVM 中， View 层和 Model 层不能直接通信，需要通过 ViewModel 层进行连接。当数据发生变化时，ViewModel 监听数据变化，更新视图；当用户操作视图时，ViewModel 监听视图变化，通知数据改动。
+
+   > vue 的数据双向绑定，是对于 UI 控件来说的，即当数据发生变化的时候，视图也发生变化，当视图发生变化的时候，数据也会跟着同步变化。
 
 3. 组件化开发
 
