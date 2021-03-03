@@ -117,17 +117,17 @@ class LinkedList {
       let cur = this.head.next
       let next = cur.next
       cur.next = null
-      while(next.next) {
+      while(next) {
         let tmp = next.next
         next.next = cur
         cur = next
         next = tmp
       }
-      next.next = cur
       this.head.next = next
     }
 
     // 尾插法
+    // 这个自己画个图，可能更加形象，光看代码比较绕
     reverseList1() {
       const root = new Node('head')
       let currentNode = this.head.next
@@ -598,45 +598,6 @@ class BST {
     return null
   }
 
-  // 删除(非递归)
-  remove1(data) {
-    let pp = null // 指向删除节点的父节点
-    let p = this.root
-
-    while(p !== null && p.data !== data) { // 查找被删除的节点
-      pp = p
-      if(data < p.data) p = p.left
-      else p = p.right
-    }
-    if(p === null) return
-
-    if(p.left !== null && p.right !== null) { // 如果被删除节点存在左右子树
-      let minpp = p							  // 则用右子树的最小节点代替
-      let minp = p.right
-      while(minp.left !== null) {
-        minpp = minp
-        minp = minp.left
-      }
-      p.data = minp.data // 替换被删除节点
-      pp = minpp // 同后续逻辑，删除右子树最小节点
-      p = minp
-    }
-    
-    let child // 保存被删除节点子树
-    if(p.left !== null) { // 如果被删除节点只存在左子树
-      child = p.left
-    }
-    else if(p.right !== null) { // 如果被删除节点只存在右子树
-      child = p.right
-    } else { // 如果被删除节点不存在左右子树
-      child = null
-    }
-
-    if(pp === null) this.root = child // 删除根节点
-    if(pp.left === p) pp.left = child
-    else pp.right = child
-  }
-
   // 删除（递归）
   remove(node, data) {
     if(data === node.data) {
@@ -684,11 +645,11 @@ bst.inOrder(bst.root)
 
 ### 排序
 
-![algorithm-sort](assets/algorithm-sort.jpg)
+<img src="assets/algorithm-sort.jpg" alt="algorithm-sort" style="zoom:50%;" />
 
 &emsp;
 
-![algorithm-sort1](assets/algorithm-sort1.jpg)
+<img src="assets/algorithm-sort1.jpg" alt="algorithm-sort1" style="zoom:50%;" />
 
 > 原地排序（Sorted in place），就是特指空间复杂度是 O(1) 的排序算法。
 
@@ -854,6 +815,8 @@ function patition(array, left, right) {
 &emsp;
 
 ##### 归并排序
+
+<img src="assets/algorithm-recursion-tree.jpg" style="zoom:50%;" />
 
 ~~~js
 function mergeSort(array, left, right) {
@@ -1033,7 +996,6 @@ class Graph {
 
   addEdge(s, t) { // 无向图
     this.adj[s].push(t)
-    this.adj[t].push(s)
   }
     
   addEdge1(s, t) { // 有向图
@@ -1190,7 +1152,7 @@ class PriorityQueue {
     return this.n === 0? true: false
   }
 
-  add(vertex) {
+  add(vertex) { // 小顶堆
     let i = ++this.n
     this.heap[i] = vertex
     while(Math.floor(i/2) && this.heap[i].dist < this.heap[Math.floor(i/2)].dist) {
