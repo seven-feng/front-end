@@ -77,8 +77,9 @@ vue.js 采用数据劫持结合发布-订阅模式的方式，通过 Object.defi
 > 属性描述符：数据描述符和存取描述符
 
 ~~~js
-function defineReactive(obj, key, val) {
+function defineReactive(obj, key) {
     let dep = new Dep()
+    let val = obj[key]
     Object.defineProperty(obj, key, {
         enumerable: true,
         configurable: true,
@@ -90,6 +91,7 @@ function defineReactive(obj, key, val) {
         },
         setter: function(newVal) {
             if(val !== newVal) {
+                val = newVal
                 dep.notify()
             }
         }

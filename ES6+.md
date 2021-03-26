@@ -144,7 +144,7 @@ aaaaaa
 
 &emsp;
 
-我的理解：在编译阶段，main.js 的 import {a} 指向了 my.js 中 export 的 a，这时，my.js 只是静态加载（放入内存），还没有执行（代码中是一个赋值语句），所以 export 的 a 是 undefined，两者只是一个引用关系。等到了运行阶段，my.js 才真正被执行。
+我的理解：在编译阶段，main.js 的 import {a} 指向了 my.js 中 export 的 a，这时，my.js 只是静态加载（放入内存，只是一个引用），还没有执行（代码中是一个赋值语句），所以 export 的 a 是 undefined，两者只是一个引用关系。等到了运行阶段，my.js 才真正被执行。
 
 &emsp;
 

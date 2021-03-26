@@ -820,9 +820,11 @@ require("module");
 `AMD` 规范只有一个主要接口 `define(id?, dependencies?, factory)`，它需要在声明模块的时候指定所有的依赖 `dependencies`，并且还要当做形参传到 `factory` 中，对于依赖的模块**提前执行**，依赖前置。
 
 ```js
+// 定义模块
 define("module", ["dep1", "dep2"], function(d1, d2) {
   return someExportedValue; // 导出
 });
+// 引入模块
 require(["module"], function(module) {});
 ```
 

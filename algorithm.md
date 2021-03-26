@@ -1508,14 +1508,9 @@ function knapsack(weight, value, w, n) {
 // 二维
 function knapsack(weight, value, w, n) {
   let k = []
-  for(let i = 0; i < n; i++) {
-    k[i] = []
+  for (let i = 0; i < n; i++) {
+      k[i] = new Array(w+1).fill(0)
   }
-
-  for(let i = 0; i < n; i++) 
-    for(let j = 0; j <= w; j++) {
-      k[i][j] = 0
-    }
 
   k[0][weight[0]] = value[0] 
   for(let i = 1; i < n; i++) {
